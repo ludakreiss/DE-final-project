@@ -1,0 +1,11 @@
+#Ignore large datasets
+data/
+*.parquet
+
+#Python cache
+__pycache__/
+*.pyc
+
+#Virtual environments
+.venv/
+.env/
