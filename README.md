@@ -1,4 +1,4 @@
-#Redset Streaming Project
+# Redset Streaming Project
 
 This project implements a streaming pipeline for the Redset dataset.
 It replays real Redshift query workloads in accelerated time and sends
@@ -6,7 +6,7 @@ cleaned query events to Kafka for further analysis.
 
 ---
 
-#Project Implementation
+# Project Implementation
 
 The pipeline consists of three main steps:
 
@@ -27,7 +27,7 @@ The pipeline consists of three main steps:
 
 ---
 
-#Requirements
+# Requirements
 
 - Python 3.9+
 - DuckDB
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 ```
 ---
 
-#Dataset setup
+# Dataset setup
 Due to GitHub file size limits, the dataset is not included in the repository.
 Steps to run locally:
 Download sample_0.01.parquet
