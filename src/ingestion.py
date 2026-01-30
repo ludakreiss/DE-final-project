@@ -1,6 +1,7 @@
 import duckdb
 import pandas as pd
 
+
 def load_raw_data(parquet_path: str) -> pd.DataFrame:
     """
     Load raw Redset data from a parquet file using DuckDB.
