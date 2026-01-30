@@ -43,7 +43,7 @@ def replay_hourly(
         # send all queries from this hour
     for _, row in hour_df.iterrows():
         event = row.to_dict()
-
+        event["query_label"] = str(row["query_type"]).upper()
         json_event = json.dumps(event, default=str)
 
         producer.produce(
