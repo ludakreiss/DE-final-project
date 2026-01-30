@@ -4,182 +4,167 @@ import plotly.express as px
 import numpy as np
 import datetime
 
+
 def run_redshift_optimizer():
     # Page configuration (Titel)
     # Nota: st.set_page_config debe ser la primera instrucción. 
     # Si se usa dentro de una función, el script principal debe llamarla al inicio.
     st.set_page_config(page_title="Redshift Optimizer", layout="wide")
 
-    # Style (CSS)
     st.markdown("""
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
-        
-        /* ---- App General Representation ----*/
-        /* letter style */
-        html, body, [class*="css"] { 
-            font-family: 'Inter', monospace; 
-            }
-        
-        /* Background */
-        .stApp {
-            background-color: #0F172A;
-            line-height: 0.1;
-        }
-                
-        /* Wide */
-        [data-testid="stMain"]{
-            /* No idea, borrar despues*/
-            @media (min-width: calc(736px + 1rem)) {
-                .st-emotion-cache-zy6yx3 {
-                    padding-left: 1.5rem;
-                    padding-right: 1.5rem;
-                }
-            }
-            .st-emotion-cache-zy6yx3 {
-                width: 100%;
-                padding: 2rem 5rem 0rem;
-            }   
-        }
-        
-         /* Space to top */
-        .st-emotion-cache-zy6yx3 {
-            padding-top: 8rem !important;
-        }
-                
-        /* Center main title */
-        h1, [data-testid="stMarkdownContainer"] p {
-            text-align: center;
-            width: 100%;
-        }
-                
-        /* Titels colors */         
-        h1, h2, h3 {
-            color: #F8FAFC !important;
-            font-weight: 800 !important;
-            letter-spacing: -0.02em;
-        }
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-        /* Logo circle right */
-        .st-emotion-cache-7czcpc > img {
-            border-radius: 9rem;
-        }
-                
-        /* Reduce divider space */
-        hr {
-            margin-top: 0rem !important;
-            margin-bottom: 0rem !important;
-        }
-                    
-        /* NO SCROLL config */
-        .main {
-            overflow: hidden;
-            }
-        .block-container {
-            padding-top: 2rem !important;
-            padding-bottom: 0rem !important;
-            height: 110vh;
-            overflow: hidden;
-        }
-        
-        /* Fit all in one page */
-        [data-testid="stVerticalBlock"] { 
-            gap: 0.5rem !important; 
-                }
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+        color: #E6EEF8;
+    }
 
-        /* Limit graphs high */
-        iframe { 
-            height: 300px !important;
-            max-height: 250px !important;
-        } 
-        
+    .stApp {
+        background: linear-gradient(180deg,#07192a 0%, #0b2239 100%);
+    }
 
-        /* --- Tabs ---*/
-        /* Tabs config*/
-        button[data-baseweb="tab"] { 
-            font-size: 1.1rem !important; 
-            color: #F8FAFC !important; 
-        }
-            
-        /* Tabs visual */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 20px;
-        }
-                
-        /* --- Sidebar ---*/      
-        /* fixed side bar */
-        [data-testid="collapsedControl"] { 
-            display: none !important; 
-        }
-                
+    /*Sidebar*/
 
-        [data-testid="stSidebar"] [data-testid="stImage"] img {
-            border-radius: 70%; 
-            border: 3px solid #3B82F6; 
-            object-fit: cover; 
-            width: 130px !important; 
-            height: 130px !important;
-        }
-                
-        [data-testid="stSidebar"] { 
-            min-width: 250px !important;
-            background-color: #0F172A;
-            border-right: 1px solid #1E293B; 
-        }
-                
-        /* Multi Select filter visual */
-        [data-testid="stMultiSelect"]{
-            .st-bb {
-                background-color: #DADADA;
-                } 
-            .st-bq {
-                background-color: #3F5AD4;
-                }  
-        }
+    [data-testid="stSidebar"] {
+        background: #0F2438;
+        border-right: 1px solid #1B3A57;
+    }
 
-        /* Select box filter visual */        
-        [data-testid="stSelectbox"]{
-            .st-bb {
-                background-color: #DADADA;
-                }    
-        }
+    /*Default sidebar cards*/
+    [data-testid="stSidebar"] .element-container {
+        background: #162F47;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+        border: 1px solid #223E5C;
+    }
 
-        /* --- KPIs Box Design --- */
-        /* Metrics style box */         
-        [data-testid="stMetric"] {
-            background-color: #1E293B;
-            border: 5px solid #334155;
-            border-radius: 7px;
-            padding: 10px 20px;
-        }
-                
-        /* Metrics style numbers */          
-        [data-testid="stMetricValue"] {
-            font-size: 2.5rem;
-            title-color : #F8FAFC;
-            font-weight: 600 !important;
-        }
+    /*Labels*/
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] h2 {
+        color: #7DD3FC !important;
+        font-weight: 600;
+    }
 
-        /* Names colors */                 
-        [data-testid="stMarkdownContainer"] {
-            title-color : #F8FAFC;
-            color: #F8FAFC;
-        }
+    /*Remove black box in multiselect*/
+    [data-baseweb="select"] {
+        background: transparent !important;
+        border: none !important;
+    }
 
-        /* --- Table --- */         
-        /* Define colors and size */
-        [data-testid="stDataFrame"] {
-            background-color: #1E293B;
-            border: 3px solid #334155;
-            border-radius: 10px;
-            max-height: 200px !important; 
-            overflow-y: auto;
-        }
+    [data-baseweb="select"] > div {
+        background: transparent !important;
+    }
 
-        /* --- Graphs --- */   
+    /*Pills*/
+    [data-baseweb="tag"] {
+        background-color: #7DD3FC !important;
+        color: #052033 !important;
+        font-weight: 700;
+        border-radius: 6px !important;
+        padding: 3px 8px !important;
+        margin: 2px 6px 2px 0 !important;
+    }
 
-        </style>
-        """, unsafe_allow_html=True)
+    /*Pills layout*/
+    [data-baseweb="select"] div[role="listbox"] {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /*Selectbox*/
+    [data-baseweb="select"] div[role="button"] {
+        background: #0E1F30 !important;
+        color: #E6EEF8 !important;
+        border-radius: 8px;
+    }
+
+    /*Slider*/
+    [data-baseweb="slider"] > div {
+        background: #1E3A56 !important;
+        height: 6px !important;
+        border-radius: 8px;
+    }
+
+    [data-baseweb="slider"] div[role="slider"] {
+        background: #7DD3FC !important;
+    }
+
+    .stSlider span {
+        color: #7DD3FC !important;
+    }
+
+    /*KPIs*/
+    [data-testid="stMetric"] {
+        background: #102E4A;
+        border-radius: 14px;
+        padding: 20px;
+        border: 1px solid rgba(125,211,252,0.15);
+    }
+
+    [data-testid="stMetricValue"] {
+        color: #7DD3FC !important;
+        font-size: 2.6rem;
+        font-weight: 700;
+    }
+
+    /*Tables*/
+    [data-testid="stDataFrame"] {
+        background: #0F2438 !important;
+        border-radius: 12px;
+        border: 1px solid #223E5C;
+    }
+
+    [data-testid="stDataFrame"] th {
+        background: #162F47 !important;
+        color: #CFE7FF !important;
+    }
+
+    [data-testid="stDataFrame"] td {
+        background: #0F2438 !important;
+        color: #E6EEF8 !important;
+    }
+
+    /*Charts*/
+    [data-testid="stPlotlyChart"], iframe {
+        border-radius: 10px;
+        border: 1px solid rgba(125,211,252,0.08);
+    }
+
+    /*Logo*/
+    [data-testid="stImage"] {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    [data-testid="stImage"] img {
+        border-radius: 100%;
+        border: 3px solid rgba(125,211,252,0.2);
+    }
+
+    /*Reduce multiselect container height*/
+    [data-testid="stSidebar"] .element-container:has([data-baseweb="select"]) {
+        padding: 8px 10px !important;
+    }
+
+    /*Remove inner vertical spacing*/
+    [data-baseweb="select"] > div {
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
+
+    /*Remove hidden extra space*/
+    [data-baseweb="select"] div[role="listbox"] {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
 
     # --- SIMULACIÓN DE DATOS (Lo que vendrá de tus compañeros) ---
     @st.cache_data
@@ -231,26 +216,35 @@ def run_redshift_optimizer():
         df_filtered = df_filtered[df_filtered['fingerprint'] == f_fp]
 
     # --- TITLE ---
-    col_title, col_logo = st.columns([4, 1])
+    # col_title, col_logo = st.columns([4, 1])
+    # with col_title:
+    #     st.title("Redshift Optimization Advisor")
+    #     st.markdown("Red replay time: 2024-03-03 21:45")
+    # with col_logo:
+    #     st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+    #     st.image("logo.jpeg")
+    #     st.markdown('</div>', unsafe_allow_html=True)
+    col_title, col_logo = st.columns([6, 1])
+
     with col_title:
         st.title("Redshift Optimization Advisor")
-        st.markdown("Red replay time: 2024-03-03 21:45")
+        st.caption("Red replay time: 2024-03-03 21:45")
+
     with col_logo:
-        st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-        st.image("logo.jpeg")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.image("logo.png", width=140)
+
 
     # -- TABS --
-    tab1, tab2, tab3, tab4 = st.tabs(["About Us","Performance KPIs","Fingerprint Analysis","Optimization"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Performance KPIs","Fingerprint Analysis","Optimization","About Us"])
 
-    # -- Tab 1: About US --
-    with tab1:
+    # -- Tab 4: About US --
+    with tab4:
         st.markdown("### Project Documentation")
         st.write("Aquí irá el texto que pondrás después. Este espacio está diseñado para la descripción general del proyecto y objetivos.")
 
-    # -- Tab 2: KPIs --
+    # -- Tab 1: KPIs --
     # Creating boxes/columns (SECC1)
-    with tab2:
+    with tab1:
         c1, c2, c3, c4 = st.columns(4)
 
         # Adding data (Part to change)------------------------------
@@ -300,7 +294,8 @@ def run_redshift_optimizer():
         with col_pie:
             st.subheader("Distribution by Type")
             # Create Piechart
-            fig_pie = px.pie(df_filtered, names='query_type', hole=0.4, color_discrete_sequence=px.colors.sequential.RdBu)
+            colors = ["#7DD3FC", "#14B8A6", "#8B5CF6", "#F59E0B"]
+            fig_pie = px.pie(df_filtered, names='query_type', hole=0.4, color_discrete_sequence=colors)
             # Change display
             fig_pie.update_layout (
                 paper_bgcolor='#0F172A',
@@ -311,10 +306,13 @@ def run_redshift_optimizer():
                 legend=dict(font=dict(color='#FFFFFF'))
                 )
             st.plotly_chart(fig_pie, use_container_width=True)
-        
+            fig_pie.update_traces(
+            textfont_color='white',
+            marker=dict(line=dict(color='#0B2239', width=2))
+        )
 
-    # -- Tab 3: Fingerprints --
-    with tab3:
+    # -- Tab 2: Fingerprints --
+    with tab2:
         col_table, col_top5 = st.columns([1,1])
 
         # Table top 5 most used queries
@@ -380,7 +378,7 @@ def run_redshift_optimizer():
         st.dataframe(styled_detail, use_container_width=True, hide_index=True)
 
     # -- Optimization --
-    with tab4:
+    with tab3:
         
         # Create selection section display
         metric_choice = st.radio(
