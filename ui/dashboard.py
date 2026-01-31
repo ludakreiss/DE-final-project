@@ -24,6 +24,13 @@ def run_redshift_optimizer():
         background: linear-gradient(180deg,#07192a 0%, #0b2239 100%);
         line-height: 0.1;
     }
+                
+    /* Titels colors */        
+    h1, h2, h3 {
+        color: #F8FAFC !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.02em;
+    }
 
     /* --- Sidebar ---*/
     /* fixed side bar */
@@ -105,6 +112,13 @@ def run_redshift_optimizer():
         font-weight: 700 !important;
     }
                 
+    
+    /* secundary texts */
+    .st-emotion-cache-16idsys p, 
+    .st-emotion-cache-6qob1r,
+    [class*="st-"] p {
+        color: #7DD3FC !important;
+    }
 
     /*Slider*/
     [data-baseweb="slider"] > div {
@@ -398,7 +412,6 @@ def run_redshift_optimizer():
             height=300 
         )
 
-        st.dataframe(styled_detail, use_container_width=True, hide_index=True)
 
     # -- Optimization --
     with tab3:
