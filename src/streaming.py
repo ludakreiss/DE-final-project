@@ -12,14 +12,9 @@ def replay_hourly(
     kafka_broker: str = "localhost:9092",
     topic: str = "redset-replay",
 ):
-    """
-    Replay query workload hour-by-hour.
-    One hour of real data is replayed in `sleep_seconds`.
-    """
 
     producer = Producer({"bootstrap.servers": kafka_broker})
 
-    # select first 24 hours
     start_ts = df["arrival_timestamp"].min()
     end_ts = start_ts + timedelta(hours=hours)
 
@@ -28,30 +23,26 @@ def replay_hourly(
         (df["arrival_timestamp"] < end_ts)
     ]
 
-    # bucket queries by hour
-    df["hour_bucket"] = df["arrival_timestamp"].dt.floor("h")
+    df = df.copy()
+    df.loc[:, "hour_bucket"] = df["arrival_timestamp"].dt.floor("h")
+
     hour_groups = df.groupby("hour_bucket")
 
     print(f"Starting replay for {len(hour_groups)} hours")
 
     for hour_index, (hour, hour_df) in enumerate(hour_groups):
-        print(
-            f"Replaying hour {hour_index}: {hour} "
-            f"({len(hour_df)} queries)"
-        )
+        print(f"Replaying hour {hour_index}: {hour}")
 
-        # send all queries from this hour
-    for _, row in hour_df.iterrows():
-        event = row.to_dict()
-        event["query_label"] = str(row["query_type"]).upper()
-        json_event = json.dumps(event, default=str)
+        # ✅ send rows normally (Kafka safe)
+        for _, row in hour_df.iterrows():
+            producer.produce(
+                topic,
+                value=json.dumps(row.to_dict(), default=str)
+            )
 
-        producer.produce(
-            topic,
-            value=json_event
-        )
+        producer.flush()
 
-    if hour_index < hours - 1:
-        time.sleep(sleep_seconds)
-    producer.flush()
+        if hour_index < hours - 1:
+            time.sleep(sleep_seconds)
+
     print("Streaming finished.")

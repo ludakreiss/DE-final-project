@@ -1,8 +1,43 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import numpy as np
+# import numpy as np
 import datetime
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PARQUET_PATH = os.path.join(BASE_DIR, "data", "consumed", "cleaned_consumed.parquet")
+
+
+@st.cache_data(ttl=5)
+def load_real_data():
+    try:
+        df = pd.read_parquet(PARQUET_PATH)
+    except Exception:
+        df = pd.DataFrame()
+
+    # Ensure ALL columns UI expects always exist
+    required_cols = [
+        "arrival_timestamp",
+        "execution_duration_ms",
+        "query_label",
+        "mbytes_scanned",
+        "query_text",
+    ]
+
+    for col in required_cols:
+        if col not in df.columns:
+            df[col] = None
+
+    df["timestamp"] = pd.to_datetime(df["arrival_timestamp"], errors="coerce")
+    df["duration_sec"] = df["execution_duration_ms"].fillna(0) / 1000
+    df["query_type"] = (df["query_text"].astype(str).str.strip().str.split().str[0].str.upper())
+    df["mb_scanned"] = df["mbytes_scanned"].fillna(0)
+    df["query_id"] = df.index.astype(str)
+    df["fingerprint"] = df["query_text"].astype(str).str.slice(0, 80)
+    df["is_redundant"] = False
+
+    return df
 
 
 def run_redshift_optimizer():
@@ -166,23 +201,25 @@ def run_redshift_optimizer():
     </style>
     """, unsafe_allow_html=True)
 
-    # --- SIMULACIÓN DE DATOS (Lo que vendrá de tus compañeros) ---
-    @st.cache_data
-    def get_simulated_data():
-        np.random.seed(35)
-        rows = 200
-        data = {
-            'timestamp': pd.date_range(start='2024-01-01', periods=rows, freq='15min'),
-            'query_id': [f"Q-{i}" for i in range(rows)],
-            'fingerprint': [f"FP-{np.random.randint(1, 20)}" for _ in range(rows)],
-            'query_type': np.random.choice(['SELECT', 'INSERT', 'UPDATE', 'CTAS'], rows),
-            'duration_sec': np.random.uniform(0.5, 30.0, rows),
-            'mb_scanned': np.random.uniform(10, 5000, rows),
-            'is_redundant': np.random.choice([True, False], rows, p=[0.4, 0.6])
-        }
-        return pd.DataFrame(data)
+    # # --- SIMULACIÓN DE DATOS (Lo que vendrá de tus compañeros) ---
+    # @st.cache_data
+    # def get_simulated_data():
+    #     np.random.seed(35)
+    #     rows = 200
+    #     data = {
+    #         'timestamp': pd.date_range(start='2024-01-01', periods=rows, freq='15min'),
+    #         'query_id': [f"Q-{i}" for i in range(rows)],
+    #         'fingerprint': [f"FP-{np.random.randint(1, 20)}" for _ in range(rows)],
+    #         'query_type': np.random.choice(['SELECT', 'INSERT', 'UPDATE', 'CTAS'], rows),
+    #         'duration_sec': np.random.uniform(0.5, 30.0, rows),
+    #         'mb_scanned': np.random.uniform(10, 5000, rows),
+    #         'is_redundant': np.random.choice([True, False], rows, p=[0.4, 0.6])
+    #     }
+    #     return pd.DataFrame(data)
 
-    df = get_simulated_data()
+    df = load_real_data()
+    
+
 
     # -- Sidebar Filters --
     # Set filters design and type
@@ -191,10 +228,15 @@ def run_redshift_optimizer():
     f_fp = st.sidebar.selectbox("Fingerprint", ["All"] + list(df['fingerprint'].unique()))
 
     # Filter time: Get min y max values
-    min_time = df['timestamp'].min().to_pydatetime()
-    max_time = df['timestamp'].max().to_pydatetime()
 
-    # Chane format to minutes
+    if df["timestamp"].notna().any():
+        min_time = df["timestamp"].min().to_pydatetime()
+        max_time = df["timestamp"].max().to_pydatetime()
+    else:
+        now = datetime.datetime.now()
+        min_time = now
+        max_time = now + datetime.timedelta(minutes=1)
+
     time_range = st.sidebar.slider(
         "Time range (minutes)",
         min_value=min_time,
@@ -203,6 +245,7 @@ def run_redshift_optimizer():
         step=datetime.timedelta(minutes=1),
         format="HH:mm"
     )
+
 
     # Filter execution
     df_filtered = df[
@@ -231,7 +274,7 @@ def run_redshift_optimizer():
         st.caption("Red replay time: 2024-03-03 21:45")
 
     with col_logo:
-        st.image("logo.png", width=140)
+        st.image("ui/logo.png", width=140)
 
 
     # -- TABS --
@@ -288,7 +331,7 @@ def run_redshift_optimizer():
                 xaxis=dict(tickfont=dict(color='#FFFFFF')),
                 yaxis=dict(tickfont=dict(color='#FFFFFF'))  
             )
-            st.plotly_chart(fig_line, use_container_width=True)
+            st.plotly_chart(fig_line, width="stretch")
 
         # Piechart Type
         with col_pie:
@@ -305,7 +348,7 @@ def run_redshift_optimizer():
                 font=dict(color='#FFFFFF'),
                 legend=dict(font=dict(color='#FFFFFF'))
                 )
-            st.plotly_chart(fig_pie, use_container_width=True)
+            st.plotly_chart(fig_pie, width="stretch")
             fig_pie.update_traces(
             textfont_color='white',
             marker=dict(line=dict(color='#0B2239', width=2))
@@ -335,7 +378,7 @@ def run_redshift_optimizer():
                 'total_mb': '{:,.2f} MB',   
                 'avg_time': '{:.2f}s'       
                 })
-            st.dataframe(styled_df, use_container_width=True, hide_index=True)
+            st.dataframe(styled_df, width="stretch", hide_index=True)
         
         # Graph frecuency vs avg execution time
         with col_table:
@@ -351,7 +394,7 @@ def run_redshift_optimizer():
                 margin=dict(l=0, r=0, t=20, b=0), 
                 height=200,
             )
-            st.plotly_chart(fig_scatter, use_container_width=True)
+            st.plotly_chart(fig_scatter, width="stretch")
         
         st.divider()
 
@@ -370,12 +413,12 @@ def run_redshift_optimizer():
         # Set size
         st.dataframe(
             styled_detail, 
-            use_container_width=True, 
+            width="stretch", 
             hide_index=True,
             height=300 
         )
 
-        st.dataframe(styled_detail, use_container_width=True, hide_index=True)
+        st.dataframe(styled_detail, width="stretch", hide_index=True)
 
     # -- Optimization --
     with tab3:
@@ -440,7 +483,7 @@ def run_redshift_optimizer():
             xaxis=dict(tickfont=dict(color='#FFFFFF')),
             showlegend=False
         )
-        st.plotly_chart(fig_impact, use_container_width=True)
+        st.plotly_chart(fig_impact, width="stretch")
 
 # Ejecución
 if __name__ == "__main__":
