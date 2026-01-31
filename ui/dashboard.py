@@ -57,13 +57,36 @@ def run_redshift_optimizer():
 
     .stApp {
         background: linear-gradient(180deg,#07192a 0%, #0b2239 100%);
+        line-height: 0.1;
+    }
+                
+    /* Titels colors */        
+    h1, h2, h3 {
+        color: #F8FAFC !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.02em;
     }
 
-    /*Sidebar*/
-
+    /* --- Sidebar ---*/
+    /* fixed side bar */
+    [data-testid="stSidebarCollapsedControl"], 
+    [data-testid="collapsedControl"],
+        button[kind="headerNoPadding"] {
+            display: none !important;
+    }
+                
+    section[data-testid="stSidebar"] {
+        min-width: 280px !important;
+        max-width: 280px !important;
+        width: 280px !important;
+        transform: none !important;
+        transition: none !important;
+    }
+                
     [data-testid="stSidebar"] {
         background: #0F2438;
         border-right: 1px solid #1B3A57;
+        min-width: 250px !important;
     }
 
     /*Default sidebar cards*/
@@ -116,6 +139,20 @@ def run_redshift_optimizer():
         background: #0E1F30 !important;
         color: #E6EEF8 !important;
         border-radius: 8px;
+    }
+                
+    [data-testid="stSidebar"] [data-baseweb="select"] [aria-selected="true"],
+    [data-testid="stSidebar"] [data-baseweb="select"] div[role="button"] {
+        color: #FF5733 !important; /* He puesto Naranja para que confirmes que funciona, luego cámbialo */
+        font-weight: 700 !important;
+    }
+                
+    
+    /* secundary texts */
+    .st-emotion-cache-16idsys p, 
+    .st-emotion-cache-6qob1r,
+    [class*="st-"] p {
+        color: #7DD3FC !important;
     }
 
     /*Slider*/
