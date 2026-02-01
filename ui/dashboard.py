@@ -134,13 +134,13 @@ def run_redshift_optimizer():
                 # Calculate savings
                 #saved_time = df_filtered[df_filtered['is_redundant'] == True]['duration_sec'].sum() / 3600
                 #saved_money = df_filtered[df_filtered['is_redundant'] == True]['mb_scanned'].sum() * 0.00005
-                total_mb = df_filtered['mb_scanned'].sum()
+                total_mb = (df_filtered['mb_scanned'].sum())/1000000
                 last_hour_q = len(new_data)
 
                 # Display KPIs
                 c1.metric("Total Queries", f"{total_q}","Last 24Hrs")
                 c2.metric("Redundant Queries", f"{redundant_q}", f"{int(redundant_q/total_q*100) if total_q > 0 else 0}%", delta_color="inverse")
-                c3.metric("Total MB", f"{total_mb:.2f} MB", "Last 24Hrs")
+                c3.metric("Total MB", f"{total_mb:.2f} TeraByte", "Last 24Hrs")
                 c4.metric("Last hour queries", f"{last_hour_q}",f"{int(last_hour_q/total_q*100) if total_q > 0 else 0}%")
                 #c4.metric("Potential Money Saving", f"${saved_money:.2f}", "Cost Reduction", delta_color="normal")
 
