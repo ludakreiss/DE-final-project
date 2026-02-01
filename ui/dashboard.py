@@ -110,7 +110,7 @@ def run_redshift_optimizer():
 
             # -- TABS --
             tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","About Us"]
-            tab1, tab2, tab3, tab4 = st.tabs(tabs, key="main_navigation_tabs")
+            tab1, tab2, tab3, tab4 = st.tabs(tabs)
 
             # -- Tab 4: About US --
             with tab4:
