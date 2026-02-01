@@ -13,7 +13,7 @@ def apply_style():
 
     .stApp {
         background: #0f172a;
-        line-height: 0.1;
+        line-height: 2;
     }
 
     /* Delete space on top of page */
@@ -167,5 +167,60 @@ def apply_style():
         padding: 0 !important;
     }
 
+    /* Tarjetas de Arquitectura y Equipo */
+    .about-card {
+        background: #162F47;
+        border: 8px solid #223E5C;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        height: 100%;
+    }
+    
+    /* Títulos dentro de las tarjetas de Arquitectura */
+    .about-card strong {
+        color: #F8FAFC !important; /* Blanco brillante */
+        font-size: 1.1rem !important;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    /* Subtítulos o descripción dentro de las tarjetas */
+    .about-card small {
+        color: #7DD3FC !important; /* Celeste claro para contraste */
+        font-size: 0.9rem !important;
+        line-height: 1.2 !important;
+        display: block;
+    }
+                
+    .team-badge {
+        color: #7DD3FC;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+    .team-role {
+        color: #94A3B8;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .arch-step {
+        border-left: 3px solid #7DD3FC;
+        padding-left: 15px;
+        margin-bottom: 1px;
+    }
+                
+    /* Cambiar el color del texto explicativo en About Us */
+    [data-testid="stMarkdownContainer"] p {
+    color: #E6EEF8 !important; /* Un blanco azulado claro para que resalte */
+    line-height: 1.6 !important; /* Espaciado generoso entre líneas */
+    }
+
+    /* Si quieres un color específico para la lista de capacidades */
+    .arch-step {
+        color: #7DD3FC !important; /* El celeste que usas en los KPIs */
+        font-size: 1.05rem;
+    }
     </style>
     """, unsafe_allow_html=True)

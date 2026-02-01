@@ -331,9 +331,74 @@ def run_redshift_optimizer():
                 st.plotly_chart(fig_impact, width="stretch")
             # -- Tab 4: About US --
             elif view == "About Us":
-                st.markdown("### Project Documentation")
-                st.write("Aquí irá el texto que pondrás después. Este espacio está diseñado para la descripción general del proyecto y objetivos.")
+                # What is table flippers
+                st.markdown("## 📊 What is Table Flippers?")
 
+                st.write("""
+                Table Flippers is a real-time data optimization system designed to bring transparency 
+                to database workloads. We don't just observe; we simulate and analyze to find 
+                efficiency where others see noise.
+                """)
+                    
+                # Features
+                features = [
+                    "🔄 **Replays** real query workloads",
+                    "🚀 **Streams** them through Kafka",
+                    "🕵️ **Analyzes** them live",
+                    "🔍 **Detects** redundant patterns using fingerprints",
+                    "💰 **Calculates** performance and cost impact",
+                    "📈 **Shows** optimization opportunities instantly"
+                ]
+                for feat in features:
+                    st.markdown(f"<div class='arch-step'>{feat}</div>", unsafe_allow_html=True)
+
+                st.divider()
+
+                # Arquitecture
+                st.markdown("## Architecture")
+                arch_cols = st.columns(5)
+                
+                tech_stack = [
+                    ("DuckDB", "Loads raw query data from parquet"),
+                    ("Pandas", "Cleans and prepares the data"),
+                    ("Kafka", "Streams queries in real time"),
+                    ("Metrics Engine", "Analyzes cost, redundancy, and performance"),
+                    ("Streamlit UI", "Visualizes live optimization insights")
+                ]
+
+                for i, (tech, desc) in enumerate(tech_stack):
+                    with arch_cols[i]:
+                        st.markdown(f"""
+                            <div class='about-card'>
+                                <div style='color: #7DD3FC; font-size: 1.5rem;'>⚙️</div>
+                                <strong>{tech}</strong><br>
+                                <small style='color: #94A3B8;'>{desc}</small>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+                st.divider()
+
+                # Team presentation
+                st.markdown("## 🤝 Meet the Team — Table Flippers")
+                team_cols = st.columns(4)
+                
+                team = [
+                    ("Dakshata", "Streaming & Replay Engineer"),
+                    ("Carolina", "UI / UX Engineer"),
+                    ("Avanti", "Metrics & Analytics Engineer"),
+                    ("Hend", "Systems & Integration Lead")
+                ]
+
+                for i, (name, role) in enumerate(team):
+                    with team_cols[i]:
+                        st.markdown(f"""
+                            <div class='about-card' style='text-align: center;'>
+                                <div class='team-badge'>{name}</div>
+                                <div class='team-role'>{role}</div>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+                st.markdown("<br><h4 style='text-align: center; color: #7DD3FC;'>Together, we flip database tables, not restaurant tables 🍟</h4>", unsafe_allow_html=True)
     render_dashboard(current_view)
 
 # Ejecución
