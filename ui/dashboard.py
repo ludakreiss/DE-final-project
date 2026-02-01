@@ -58,7 +58,7 @@ def run_redshift_optimizer():
         st.markdown("<h1 class='main-title'>Redshift Optimization Advisor</h1>", unsafe_allow_html=True)
     
     with head_right:
-        st.image("logo.png", width=100)
+        st.image("ui/logo.png", width=100)
 
     # Overall tabs
     tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","About Us"]
