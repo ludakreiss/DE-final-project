@@ -110,13 +110,7 @@ def run_redshift_optimizer():
 
             # -- TABS --
             tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","About Us"]
-            tab1, tab2, tab3, tab4 = st.tabs(tabs)
-
-            # Buscamos el índice de la pestaña guardada para que no salte a la primera
-            try:
-                current_index = tabs.index(st.session_state.current_tab_name)
-            except ValueError:
-                current_index = 0
+            tab1, tab2, tab3, tab4 = st.tabs(tabs, key="main_navigation_tabs")
 
             # -- Tab 4: About US --
             with tab4:
