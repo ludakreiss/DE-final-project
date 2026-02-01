@@ -62,7 +62,7 @@ def run_redshift_optimizer():
 
     # Overall tabs
     tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","About Us"]
-    current_view = st.pills("View Selector", tabs, default="Performance KPIs") # st.pills es nativo y moderno
+    current_view = st.pills("Dashboard view", tabs, default="Performance KPIs") # st.pills es nativo y moderno
 
     # Refresh part every 60s
     @st.fragment(run_every=60)
