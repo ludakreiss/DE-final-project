@@ -51,13 +51,25 @@ def run_redshift_optimizer():
     if 'historical_df' not in st.session_state:
         st.session_state.historical_df = pd.DataFrame()
 
+    # Center titel
+    head_left, head_center, head_right = st.columns([1, 4, 1])
+    
+    with head_center:
+        st.markdown("<h1 class='main-title'>Redshift Optimization Advisor</h1>", unsafe_allow_html=True)
+    
+    with head_right:
+        st.image("logo.png", width=100)
+
+    # Overall tabs
+    tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","About Us"]
+    current_view = st.pills("View Selector", tabs, default="Performance KPIs") # st.pills es nativo y moderno
+
     # Refresh part every 60s
     @st.fragment(run_every=60)
-    def render_dashboard():
+    def render_dashboard(view):
 
         # Load new data
         new_data = load_real_data()
-
         # Combine data
         if not new_data.empty:
             combined = pd.concat([st.session_state.historical_df, new_data], ignore_index=True)
@@ -70,18 +82,33 @@ def run_redshift_optimizer():
 
         if df.empty:
             st.info("Waiting for data from Kafka... (Check cleaned_consumed.parquet)")
+            empty_col1, empty_col2, empty_col3 = st.columns([1, 1, 1])
+            with empty_col2:
+                # Puedes usar una URL de un GIF o el path local "ui/loading.gif"
+                st.image("https://i.gifer.com/XVo6.gif", width=400) 
+                st.divider()
+                st.markdown("<p style='text-align: center; color: #7DD3FC;'>Waiting for data from Kafka...</p>", unsafe_allow_html=True)
             return
 
         df = df.sort_values('timestamp')
         df['is_redundant'] = df.duplicated(subset=['fingerprint'], keep='first') #------
 
         # Columns for filters vs main title
-        col_side, col_main = st.columns([1, 5])
+        col_side, col_main = st.columns([1, 6])
 
         with col_side:
             st.subheader("Live filters")
             tipos = sorted(df['query_type'].unique().tolist())
             f_type = st.multiselect("Query Type", tipos, default=tipos)
+
+            ## Conditional filter
+            #m_choice = None
+            #if view == "Optimization":
+            #    st.info("Optimization Settings")
+            #    m_choice = st.selectbox(
+            #        "Metric to Analyze",
+            #        ["Potential Saving Money ($)", "Execution Time (Hrs)", "Data Scanned (MB)"]
+            #    )
             
             fingerprint = ["All"] + sorted(df['fingerprint'].unique().tolist())
             f_fp = st.selectbox("Fingerprint", fingerprint)
@@ -92,7 +119,6 @@ def run_redshift_optimizer():
         with col_main:
             
             # Filter time: Get min y max values
-
             df_filtered = df[
                 (df['query_type'].isin(f_type)) & 
                 (df['timestamp'] >= time_range[0]) & 
@@ -101,25 +127,14 @@ def run_redshift_optimizer():
             if f_fp != "All":
                 df_filtered = df_filtered[df_filtered['fingerprint'] == f_fp]
 
-            # --- TITLE ---
-            col_title, col_logo = st.columns([6, 1])
+            # Show time
 
-            col_title.title("Redshift Optimization Advisor")
-            col_title.caption(f"Última actualización: {datetime.datetime.now().strftime('%H:%M:%S')}") #---------
-            col_logo.image("ui/logo.png", width=140)
+            st.caption(f"Last update at: {datetime.datetime.now().strftime('%H:%M:%S')}") #---------
 
-            # -- TABS --
-            tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","About Us"]
-            tab1, tab2, tab3, tab4 = st.tabs(tabs)
-
-            # -- Tab 4: About US --
-            with tab4:
-                st.markdown("### Project Documentation")
-                st.write("Aquí irá el texto que pondrás después. Este espacio está diseñado para la descripción general del proyecto y objetivos.")
 
             # -- Tab 1: KPIs --
             # Creating boxes/columns (SECC1)
-            with tab1:
+            if view == "Performance KPIs":
                 c1, c2, c3, c4 = st.columns(4)
 
                 # Adding data (Part to change)------------------------------
@@ -134,7 +149,7 @@ def run_redshift_optimizer():
                 # Display KPIs
                 c1.metric("Total Queries", f"{total_q}","Last 24Hrs")
                 c2.metric("Redundant Queries", f"{redundant_q}", f"{int(redundant_q/total_q*100) if total_q > 0 else 0}%", delta_color="inverse")
-                c3.metric("Total MB", f"{total_mb:.2f} TB", "Last 24Hrs")
+                c3.metric("Total data", f"{total_mb:.2f} TB", "Last 24Hrs")
                 c4.metric("Last hour queries", f"{last_hour_q}",f"{int(last_hour_q/total_q*100) if total_q > 0 else 0}%")
                 #c4.metric("Potential Money Saving", f"${saved_money:.2f}", "Cost Reduction", delta_color="normal")
 
@@ -190,7 +205,7 @@ def run_redshift_optimizer():
                 )
 
             # -- Tab 2: Fingerprints --
-            with tab2:
+            elif view == "Fingerprint Analysis":
                 col_table, col_top5 = st.columns([1,1])
 
                 # Table top 5 most used queries
@@ -214,14 +229,14 @@ def run_redshift_optimizer():
                         'avg_time': '{:.2f}s'       
                         })
                     st.dataframe(styled_df, width="stretch", hide_index=True)
-                
+                    
                 # Graph frecuency vs avg execution time
                 with col_table:
                     st.subheader("Fingerprint Performance Analysis")
                     # Create Graph
                     fig_scatter = px.scatter(df_fp_analysis, x='frequency', y='avg_time', size='total_mb', 
-                                    hover_name='fingerprint', color='avg_time', 
-                                    color_continuous_scale='Reds', template="plotly_dark")
+                                hover_name='fingerprint', color='avg_time', 
+                                color_continuous_scale='Reds', template="plotly_dark")
                     # Change display
                     fig_scatter.update_layout(
                         paper_bgcolor='#0F172A',
@@ -230,9 +245,8 @@ def run_redshift_optimizer():
                         height=200,
                     )
                     st.plotly_chart(fig_scatter, width="stretch")
-                
+                    
                 st.divider()
-
                 # Table detailed queries
                 st.subheader("Detailed Query Optimization Actions")
 
@@ -241,9 +255,9 @@ def run_redshift_optimizer():
                 df_detail['suggested_action'] = df_detail['fingerprint'] + " - Materialize"
                 # Change display
                 styled_detail = df_detail.head(10).style.set_properties(**{
-                    'background-color': '#1E293B',
-                    'color': '#F8FAFC',
-                    'border-color': '#475569'
+                   'background-color': '#1E293B',
+                   'color': '#F8FAFC',
+                   'border-color': '#475569'
                 })
                 # Set size
                 st.dataframe(
@@ -254,7 +268,7 @@ def run_redshift_optimizer():
                 )
 
             # -- Optimization --
-            with tab3:
+            elif view == "Optimization":
                 # Create selection section display
                 metric_choice = st.selectbox(
                     "Select Metric to Analyze",
@@ -315,7 +329,12 @@ def run_redshift_optimizer():
                     showlegend=False
                 )
                 st.plotly_chart(fig_impact, width="stretch")
-    render_dashboard()
+            # -- Tab 4: About US --
+            elif view == "About Us":
+                st.markdown("### Project Documentation")
+                st.write("Aquí irá el texto que pondrás después. Este espacio está diseñado para la descripción general del proyecto y objetivos.")
+
+    render_dashboard(current_view)
 
 # Ejecución
 if __name__ == "__main__":

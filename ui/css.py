@@ -12,59 +12,47 @@ def apply_style():
     }
 
     .stApp {
-        background: linear-gradient(180deg,#07192a 0%, #0b2239 100%);
+        background: #0f172a;
         line-height: 0.1;
     }
-                
+
+    /* Delete space on top of page */
+    .block-container {
+        padding-top: 4rem !important;
+        padding-bottom: 0rem !important;
+    }
+
+    /* Reduce space within elements */
+    [data-testid="stVerticalBlock"] {
+        gap: 0.5rem !important; 
+    }
+                   
     /* Titels colors */        
     h1, h2, h3 {
         color: #F8FAFC !important;
         font-weight: 800 !important;
         letter-spacing: -0.02em;
-    }
-
-    /* --- Sidebar ---*/
-    /* fixed side bar */
-    [data-testid="stSidebarCollapsedControl"], 
-    [data-testid="collapsedControl"],
-        button[kind="headerNoPadding"] {
-            display: none !important;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+        padding-top: 0px !important;
     }
                 
-    section[data-testid="stSidebar"] {
-        min-width: 280px !important;
-        max-width: 280px !important;
-        width: 280px !important;
-        transform: none !important;
-        transition: none !important;
+    /* Center title*/
+    .main-title {
+        text-align: center;
+        width: 100%;
+        margin-top: -50px; /* Ajuste para subirlo si hay mucho espacio */
+        padding-bottom: 10px;
     }
                 
-    [data-testid="stSidebar"] {
-        background: #0F2438;
-        border-right: 1px solid #1B3A57;
-        min-width: 250px !important;
-    }
-
-    /*Default sidebar cards*/
-    [data-testid="stSidebar"] .element-container {
-        background: #162F47;
-        border-radius: 12px;
-        padding: 14px 16px;
-        margin-bottom: 18px;
-        border: 1px solid #223E5C;
-    }
+    .stRadio [data-testid="stMarkdownContainer"] p { font-size: 20px; font-weight: bold; }
+        div[data-testid="stHorizontalBlock"] { background-color: #0F172A; padding: 10px; border-radius: 3px; }
 
     /*Labels*/
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] h2 {
         color: #7DD3FC !important;
         font-weight: 600;
-    }
-
-    /*Remove black box in multiselect*/
-    [data-baseweb="select"] {
-        background: transparent !important;
-        border: none !important;
     }
 
     [data-baseweb="select"] > div {
@@ -96,14 +84,7 @@ def apply_style():
         color: #E6EEF8 !important;
         border-radius: 8px;
     }
-                
-    [data-testid="stSidebar"] [data-baseweb="select"] [aria-selected="true"],
-    [data-testid="stSidebar"] [data-baseweb="select"] div[role="button"] {
-        color: #FF5733 !important; /* He puesto Naranja para que confirmes que funciona, luego cámbialo */
-        font-weight: 700 !important;
-    }
-                
-    
+            
     /* secundary texts */
     .st-emotion-cache-16idsys p, 
     .st-emotion-cache-6qob1r,
@@ -171,18 +152,13 @@ def apply_style():
 
     [data-testid="stImage"] img {
         border-radius: 100%;
-        border: 3px solid rgba(125,211,252,0.2);
-    }
-
-    /*Reduce multiselect container height*/
-    [data-testid="stSidebar"] .element-container:has([data-baseweb="select"]) {
-        padding: 8px 10px !important;
+        border: 4px solid rgba(125,211,252,0.2);
     }
 
     /*Remove inner vertical spacing*/
     [data-baseweb="select"] > div {
         padding-top: 2px !important;
-        padding-bottom: 2px !important;
+        padding-bottom: 1px !important;
     }
 
     /*Remove hidden extra space*/
