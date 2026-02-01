@@ -275,7 +275,7 @@ def run_redshift_optimizer():
                 metric_choice = st.radio(
                     "Select Metric to Analyze",
                     ["Potential Saving Money ($)", "Execution Time (Hrs)", "Data Scanned (MB)"],
-                    key = metric_choice,
+                    key = "metric_choice",
                     horizontal=True
                 )
 
