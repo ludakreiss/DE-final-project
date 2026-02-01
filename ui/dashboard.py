@@ -52,8 +52,8 @@ def run_redshift_optimizer():
         st.session_state.historical_df = pd.DataFrame()
 
     # session for tabs
-    if 'active_tab' not in st.session_state:
-        st.session_state.active_tab = 0
+    if 'current_tab_name' not in st.session_state:
+        st.session_state.current_tab_name = "Performance KPIs"
 
     # Refresh part every 60s
     @st.fragment(run_every=60)
@@ -116,16 +116,22 @@ def run_redshift_optimizer():
             tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","About Us"]
             tab1, tab2, tab3, tab4 = st.tabs(tabs)
 
+            # Buscamos el índice de la pestaña guardada para que no salte a la primera
+            try:
+                current_index = tabs.index(st.session_state.current_tab_name)
+            except ValueError:
+                current_index = 0
+
             # -- Tab 4: About US --
             with tab4:
-                st.session_state.active_tab = 3
+                st.session_state.current_tab_name = "About Us"
                 st.markdown("### Project Documentation")
                 st.write("Aquí irá el texto que pondrás después. Este espacio está diseñado para la descripción general del proyecto y objetivos.")
 
             # -- Tab 1: KPIs --
             # Creating boxes/columns (SECC1)
             with tab1:
-                st.session_state.active_tab = 0
+                st.session_state.current_tab_name = "Performance KPIs"
                 c1, c2, c3, c4 = st.columns(4)
 
                 # Adding data (Part to change)------------------------------
@@ -140,7 +146,7 @@ def run_redshift_optimizer():
                 # Display KPIs
                 c1.metric("Total Queries", f"{total_q}","Last 24Hrs")
                 c2.metric("Redundant Queries", f"{redundant_q}", f"{int(redundant_q/total_q*100) if total_q > 0 else 0}%", delta_color="inverse")
-                c3.metric("Total MB", f"{total_mb:.2f} TeraByte", "Last 24Hrs")
+                c3.metric("Total MB", f"{total_mb:.2f} TB", "Last 24Hrs")
                 c4.metric("Last hour queries", f"{last_hour_q}",f"{int(last_hour_q/total_q*100) if total_q > 0 else 0}%")
                 #c4.metric("Potential Money Saving", f"${saved_money:.2f}", "Cost Reduction", delta_color="normal")
 
@@ -197,7 +203,7 @@ def run_redshift_optimizer():
 
             # -- Tab 2: Fingerprints --
             with tab2:
-                st.session_state.active_tab = 1
+                st.session_state.current_tab_name = "Fingerprint Analysis"
                 col_table, col_top5 = st.columns([1,1])
 
                 # Table top 5 most used queries
@@ -264,11 +270,12 @@ def run_redshift_optimizer():
 
             # -- Optimization --
             with tab3:
-                st.session_state.active_tab = 2
+                st.session_state.current_tab_name = "Optimization"
                 # Create selection section display
                 metric_choice = st.radio(
                     "Select Metric to Analyze",
                     ["Potential Saving Money ($)", "Execution Time (Hrs)", "Data Scanned (MB)"],
+                    key = metric_choice,
                     horizontal=True
                 )
 
