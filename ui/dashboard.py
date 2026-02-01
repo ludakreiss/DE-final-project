@@ -51,10 +51,6 @@ def run_redshift_optimizer():
     if 'historical_df' not in st.session_state:
         st.session_state.historical_df = pd.DataFrame()
 
-    # session for tabs
-    if 'current_tab_name' not in st.session_state:
-        st.session_state.current_tab_name = "Performance KPIs"
-
     # Refresh part every 60s
     @st.fragment(run_every=60)
     def render_dashboard():
@@ -79,7 +75,7 @@ def run_redshift_optimizer():
         df = df.sort_values('timestamp')
         df['is_redundant'] = df.duplicated(subset=['fingerprint'], keep='first') #------
 
-        # --- FILTROS EN COLUMNAS (Para que funcionen dentro del fragmento) ---
+        # Columns for filters vs main title
         col_side, col_main = st.columns([1, 5])
 
         with col_side:
@@ -124,14 +120,12 @@ def run_redshift_optimizer():
 
             # -- Tab 4: About US --
             with tab4:
-                st.session_state.current_tab_name = "About Us"
                 st.markdown("### Project Documentation")
                 st.write("Aquí irá el texto que pondrás después. Este espacio está diseñado para la descripción general del proyecto y objetivos.")
 
             # -- Tab 1: KPIs --
             # Creating boxes/columns (SECC1)
             with tab1:
-                st.session_state.current_tab_name = "Performance KPIs"
                 c1, c2, c3, c4 = st.columns(4)
 
                 # Adding data (Part to change)------------------------------
@@ -203,7 +197,6 @@ def run_redshift_optimizer():
 
             # -- Tab 2: Fingerprints --
             with tab2:
-                st.session_state.current_tab_name = "Fingerprint Analysis"
                 col_table, col_top5 = st.columns([1,1])
 
                 # Table top 5 most used queries
@@ -266,17 +259,13 @@ def run_redshift_optimizer():
                     height=300 
                 )
 
-                st.dataframe(styled_detail, width="stretch", hide_index=True)
-
             # -- Optimization --
             with tab3:
-                st.session_state.current_tab_name = "Optimization"
                 # Create selection section display
-                metric_choice = st.radio(
+                metric_choice = st.selectbox(
                     "Select Metric to Analyze",
                     ["Potential Saving Money ($)", "Execution Time (Hrs)", "Data Scanned (MB)"],
-                    key = "metric_choice",
-                    horizontal=True
+                    key="metric_choice_dropdown" # Key para que no se resetee
                 )
 
                 # Calculate totals (Money, time, mb)
@@ -306,7 +295,7 @@ def run_redshift_optimizer():
 
                 # Create data frame
                 comparison_data = pd.DataFrame({
-                    'Scenario': ['Current (Redundant)', 'With Materialized View'],
+                    'Scenario': ['Current (Redundant)', 'After optimization'],
                     'Value': [val_actual, val_projected]
                 })
 
@@ -317,7 +306,7 @@ def run_redshift_optimizer():
                     y='Value', 
                     text_auto='.2s',
                     color='Scenario',
-                    color_discrete_map={'Current (Redundant)': '#ef4444', 'With Materialized View': '#00CC96'},
+                    color_discrete_map={'Current (Redundant)': '#ef4444', 'After optimization': '#00CC96'},
                     template="plotly_dark"
                 )
 
