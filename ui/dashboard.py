@@ -39,7 +39,6 @@ def load_real_data():
 
     return df
 
-
 def run_redshift_optimizer():
     # Page configuration (Titel)
     st.set_page_config(page_title="Redshift Optimizer", layout="wide")
@@ -47,11 +46,16 @@ def run_redshift_optimizer():
     # Apply the CSS file
     apply_style()
 
-    # --- INICIALICE global stateL ---
+    # --- INICIALIZE global state ---
+    # session for dataframe
     if 'historical_df' not in st.session_state:
         st.session_state.historical_df = pd.DataFrame()
 
-    # Usamos un fragmento para que el dashboard sea "vivo"
+    # session for tabs
+    if 'active_tab' not in st.session_state:
+        st.session_state.active_tab = 0
+
+    # Refresh part every 60s
     @st.fragment(run_every=60)
     def render_dashboard():
 
@@ -109,16 +113,19 @@ def run_redshift_optimizer():
             col_logo.image("ui/logo.png", width=140)
 
             # -- TABS --
-            tab1, tab2, tab3, tab4 = st.tabs(["Performance KPIs","Fingerprint Analysis","Optimization","About Us"])
+            tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","About Us"]
+            tab1, tab2, tab3, tab4 = st.tabs(tabs)
 
             # -- Tab 4: About US --
             with tab4:
+                st.session_state.active_tab = 3
                 st.markdown("### Project Documentation")
                 st.write("Aquí irá el texto que pondrás después. Este espacio está diseñado para la descripción general del proyecto y objetivos.")
 
             # -- Tab 1: KPIs --
             # Creating boxes/columns (SECC1)
             with tab1:
+                st.session_state.active_tab = 0
                 c1, c2, c3, c4 = st.columns(4)
 
                 # Adding data (Part to change)------------------------------
@@ -190,6 +197,7 @@ def run_redshift_optimizer():
 
             # -- Tab 2: Fingerprints --
             with tab2:
+                st.session_state.active_tab = 1
                 col_table, col_top5 = st.columns([1,1])
 
                 # Table top 5 most used queries
@@ -256,7 +264,7 @@ def run_redshift_optimizer():
 
             # -- Optimization --
             with tab3:
-                
+                st.session_state.active_tab = 2
                 # Create selection section display
                 metric_choice = st.radio(
                     "Select Metric to Analyze",
@@ -270,7 +278,7 @@ def run_redshift_optimizer():
                 total_mb_now = df_filtered['mb_scanned'].sum()
 
                 # Calculate savings
-                redundant_mask = df_filtered['is_redundant'] == False
+                redundant_mask = df_filtered['is_redundant'] == True
                 saving_money = df_filtered[redundant_mask]['mb_scanned'].sum() * 0.00005 
                 saving_time = df_filtered[redundant_mask]['duration_sec'].sum() / 3600
                 saving_mb = df_filtered[redundant_mask]['mb_scanned'].sum()
