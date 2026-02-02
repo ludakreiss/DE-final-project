@@ -62,7 +62,7 @@ def run_redshift_optimizer():
 
     # Overall tabs
     tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","You Are The Optimizer","About Us"]
-    current_view = st.pills("Dashboard view", tabs, default="Performance KPIs") # st.pills es nativo y moderno
+    current_view = st.pills("Dashboard view",tabs, default="Performance KPIs")
 
     # Refresh part every 60s
     @st.fragment(run_every=60)
@@ -163,8 +163,8 @@ def run_redshift_optimizer():
                     st.subheader("Time vs Queries (Total vs Unique)")
                     # Group by time
                     df_time = df_filtered.groupby(df_filtered['timestamp'].dt.hour).agg(
-                        total=('query_id', 'count'),
-                        unique=('is_redundant', 'count') #---------------------------------- checar
+                        total=('is_redundant',lambda x: (x == True).sum()),
+                        unique=('is_redundant',lambda x: (x == False).sum()) #---------------------------------- checar
                     ).reset_index()
                     # Create graph
                     fig_line = px.area(df_time, x='timestamp', y=['unique', 'total'], 
@@ -218,8 +218,9 @@ def run_redshift_optimizer():
                         total_mb=('mb_scanned', 'sum')
                     ).reset_index()
                     # Change display
-                    df_display = df_fp_analysis.sort_values('total_mb', ascending=False).head(5)
-                    styled_df = df_display.style.set_properties(**{
+                    df_fp_analysis["Top_ratio"]= df_fp_analysis['avg_time']* df_fp_analysis['frequency']*df_fp_analysis['total_mb']
+                    df_display = df_fp_analysis.sort_values('Top_ratio', ascending=False).head(5)
+                    styled_df = df_display[['fingerprint','avg_time','frequency','total_mb']].style.set_properties(**{
                         'background-color': '#1E293B',
                         'color': '#F8FAFC',           
                         'border-color': '#475569',    
@@ -251,10 +252,13 @@ def run_redshift_optimizer():
                 st.subheader("Detailed Query Optimization Actions")
 
                 # Create table
-                df_detail = df_filtered[['timestamp', 'query_id', 'fingerprint']].copy()
+                df_detail = df_filtered[['timestamp', 'query_id', 'fingerprint','mb_scanned']].copy()
+                #print(type(df_detail["mb_scanned"],type(df_detail["duration_sec"])))
+                df_detail["heavt_op"] = df_filtered["mb_scanned"] * df_filtered["duration_sec"]
+                df_detail = df_detail.sort_values('heavt_op', ascending=False).head(10)
                 df_detail['suggested_action'] = df_detail['fingerprint'] + " - Materialize"
                 # Change display
-                styled_detail = df_detail.head(10).style.set_properties(**{
+                styled_detail = df_detail[['timestamp', 'query_id', 'fingerprint','suggested_action']].head(10).style.set_properties(**{
                    'background-color': '#1E293B',
                    'color': '#F8FAFC',
                    'border-color': '#475569'
@@ -329,6 +333,7 @@ def run_redshift_optimizer():
                     showlegend=False
                 )
                 st.plotly_chart(fig_impact, width="stretch")
+
             elif view == "You Are The Optimizer":
 
                 st.title("You Are the Optimizer")
@@ -457,7 +462,6 @@ def run_redshift_optimizer():
                     ]
 
                     st.dataframe(user_df, use_container_width=True, hide_index=True)
-
 
             # -- Tab 4: About US --
             elif view == "About Us":
