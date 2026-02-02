@@ -61,7 +61,7 @@ def run_redshift_optimizer():
         st.image("ui/logo.png", width=100)
 
     # Overall tabs
-    tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","About Us"]
+    tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","You Are The Optimizer","About Us"]
     current_view = st.pills("Dashboard view", tabs, default="Performance KPIs") # st.pills es nativo y moderno
 
     # Refresh part every 60s
@@ -329,6 +329,136 @@ def run_redshift_optimizer():
                     showlegend=False
                 )
                 st.plotly_chart(fig_impact, width="stretch")
+            elif view == "You Are The Optimizer":
+
+                st.title("You Are the Optimizer")
+
+                st.write(
+                    "Below are real query fingerprints from the selected time range.\n"
+                    "Pick TWO that you would materialize to save the most warehouse cost."
+                )
+
+                # ---- Build metrics from REAL filtered data ----
+                df_game = df_filtered.groupby("fingerprint").agg(
+                    total_mb=("mb_scanned", "sum"),
+                    frequency=("query_id", "count"),
+                    avg_time=("duration_sec", "mean")
+                ).reset_index()
+
+                df_game["waste_score"] = df_game["total_mb"] * df_game["frequency"]
+                df_game = df_game[df_game["frequency"] > 2]
+
+                # ---- SESSION STATE INIT ----
+                if "game_candidates" not in st.session_state:
+                    st.session_state.game_candidates = None
+
+                if "fp_mapping" not in st.session_state:
+                    st.session_state.fp_mapping = None
+
+                if "submitted" not in st.session_state:
+                    st.session_state.submitted = False
+
+                # ---- Buttons row ----
+                col1, col2 = st.columns([6,1])
+                with col2:
+                    if st.button("Refresh"):
+                        st.session_state.game_candidates = None
+                        st.session_state.fp_mapping = None
+                        st.session_state.submitted = False
+                        st.session_state.game_selection = []
+
+                # ---- Generate candidates only if needed ----
+                if st.session_state.game_candidates is None:
+                    candidates = (
+                        df_game.sample(6, replace=False)
+                        if len(df_game) >= 6 else df_game
+                    ).reset_index(drop=True)
+
+                    # Create FP labels
+                    labels = [f"FP-{i+1}" for i in range(len(candidates))]
+                    candidates["fp_label"] = labels
+
+                    # Store mapping
+                    st.session_state.game_candidates = candidates
+                    st.session_state.fp_mapping = dict(
+                        zip(labels, candidates["fingerprint"])
+                    )
+                else:
+                    candidates = st.session_state.game_candidates
+
+                # ---- Display table with FP labels ----
+                st.dataframe(
+                    candidates[["fp_label", "frequency", "total_mb", "avg_time"]],
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+                # ---- User selection (labels only) ----
+                choices = st.multiselect(
+                    "Select TWO fingerprints to materialize:",
+                    candidates["fp_label"].tolist(),
+                    max_selections=2,
+                    key="game_selection"
+                )
+
+                # ---- Submit button ----
+                if st.button("Submit Answer"):
+                    if len(choices) != 2:
+                        st.warning("Please select exactly TWO fingerprints.")
+                    else:
+                        st.session_state.submitted = True
+                        st.session_state.user_choices = choices
+
+                # ---- Evaluate ONLY after submit ----
+                if st.session_state.submitted:
+
+                    choices = st.session_state.user_choices
+
+                    # Map labels back to real fingerprints
+                    real_choices = [
+                        st.session_state.fp_mapping[c] for c in choices
+                    ]
+
+                    best = candidates.sort_values(
+                        "waste_score", ascending=False
+                    ).head(2)["fingerprint"].tolist()
+
+                    user_score = candidates[
+                        candidates["fingerprint"].isin(real_choices)
+                    ]["waste_score"].sum()
+
+                    best_score = candidates[
+                        candidates["fingerprint"].isin(best)
+                    ]["waste_score"].sum()
+
+                    st.subheader("Result")
+
+                    if set(real_choices) == set(best):
+                        st.success("Perfect! You think exactly like Table Flippers optimizer 🚀")
+                    else:
+                        st.error("Not optimal!")
+
+                    st.write("**Your Choice Waste Saved:**", f"{user_score:,.0f}")
+                    st.write("**Best Possible Waste Saved:**", f"{best_score:,.0f}")
+
+                    # Reveal answers
+                    st.write("What the Optimizer Would Materialize")
+
+                    best_df = candidates[candidates["fingerprint"].isin(best)][
+                        ["fp_label", "fingerprint", "waste_score"]
+                    ]
+
+                    st.dataframe(best_df, use_container_width=True, hide_index=True)
+
+                    st.write("Your Selection")
+
+                    user_df = candidates[candidates["fingerprint"].isin(real_choices)][
+                        ["fp_label", "fingerprint", "waste_score"]
+                    ]
+
+                    st.dataframe(user_df, use_container_width=True, hide_index=True)
+
+
             # -- Tab 4: About US --
             elif view == "About Us":
                 # What is table flippers
