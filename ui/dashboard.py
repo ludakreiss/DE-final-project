@@ -7,22 +7,23 @@ import duckdb
 from css import apply_style
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "data", "metrics", "metrics.duckdb")
+DB_PATH = os.path.join(BASE_DIR, "metrics", "metrics.duckdb")
 
 
 # ---------- DuckDB connection ----------
-@st.cache_resource
-def get_con():
-    # read_only=True is important for stability
-    return duckdb.connect(DB_PATH, read_only=True)
+# @st.cache_resource
+# def get_con():
+#     # read_only=True is important for stability
+#     return duckdb.connect(DB_PATH, read_only=True)
 
 
 # ---------- Small helpers ----------
 def query_df(sql: str, params=None) -> pd.DataFrame:
-    con = get_con()
-    if params is None:
-        return con.execute(sql).df()
-    return con.execute(sql, params).df()
+    with duckdb.connect(DB_PATH, read_only=True) as con:
+        if params is None:
+            return con.execute(sql).df()
+        return con.execute(sql, params).df()
+
 
 
 def placeholders(n: int) -> str:
