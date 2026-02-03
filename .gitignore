@@ -9,3 +9,6 @@ __pycache__/
 #Virtual environments
 .venv/
 .env/
+
+#DuckDB
+metrics/metrics.duckdb

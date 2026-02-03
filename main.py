@@ -6,28 +6,23 @@ import threading
 import os
 import time
 
-
-# Start Metrics Consumer
-def start_metrics():
+def start_metrics_consumer():
     os.system("python metrics/metrics_consumer.py")
 
+def start_metrics_engine():
+    os.system("python metrics/metrics.py")
 
-# Start UI
 def start_ui():
-    time.sleep(3)  # give consumer time to start
+    time.sleep(3)
     os.system("streamlit run ui/dashboard.py")
-
 
 def main():
     print("Starting Redset Full System...")
 
-    # 1) Start metrics consumer in background
-    threading.Thread(target=start_metrics, daemon=True).start()
-
-    # 2) Start UI in background
+    threading.Thread(target=start_metrics_consumer, daemon=True).start()
+    threading.Thread(target=start_metrics_engine, daemon=True).start()
     threading.Thread(target=start_ui, daemon=True).start()
 
-    # 3) Give them a moment to boot
     time.sleep(5)
 
     # 4) Load raw data
