@@ -208,18 +208,22 @@ def run_redshift_optimizer():
             elif view == "Fingerprint Analysis":
                 col_table, col_top5 = st.columns([1,1])
 
+                df_fp_analysis = df_filtered.groupby('fingerprint').agg(
+                    avg_time=('duration_sec', 'mean'),
+                    frequency=('query_id', 'count'),
+                    total_mb=('mb_scanned', 'sum')
+                ).reset_index()
+                
+                df_fp_analysis["Time_for_MB"] = df_fp_analysis['avg_time'] / (df_fp_analysis['total_mb'] + 0.00001)
+                df_fp_analysis["MB_per_second"] = df_fp_analysis['total_mb'] / (df_fp_analysis['avg_time'])
+                df_fp_analysis["Impact_Score"] = df_fp_analysis["Time_for_MB"] * df_fp_analysis["frequency"]
+
                 # Table top 5 most used queries
                 with col_top5:
                     st.subheader("Top Usage Fingerprints")
-                    # Create table
-                    df_fp_analysis = df_filtered.groupby('fingerprint').agg(
-                        avg_time=('duration_sec', 'mean'),
-                        frequency=('query_id', 'count'),
-                        total_mb=('mb_scanned', 'sum')
-                    ).reset_index()
+                    
                     # Change display
-                    df_fp_analysis["Top_ratio"]= df_fp_analysis['avg_time']* df_fp_analysis['frequency']*df_fp_analysis['total_mb']
-                    df_display = df_fp_analysis.sort_values('Top_ratio', ascending=False).head(5)
+                    df_display = df_fp_analysis.sort_values('frequency', ascending=False).head(5)
                     styled_df = df_display[['fingerprint','avg_time','frequency','total_mb']].style.set_properties(**{
                         'background-color': '#1E293B',
                         'color': '#F8FAFC',           
@@ -235,8 +239,9 @@ def run_redshift_optimizer():
                 with col_table:
                     st.subheader("Fingerprint Performance Analysis")
                     # Create Graph
-                    fig_scatter = px.scatter(df_fp_analysis, x='frequency', y='avg_time', size='total_mb', 
-                                hover_name='fingerprint', color='avg_time', 
+                    df_top25 = df_fp_analysis.sort_values('Time_for_MB', ascending=False).head(25)
+                    fig_scatter = px.scatter(df_top25, y='Time_for_MB', x='frequency', 
+                                hover_name='fingerprint', color='Time_for_MB', size='Impact_Score',
                                 color_continuous_scale='Reds', template="plotly_dark")
                     # Change display
                     fig_scatter.update_layout(
