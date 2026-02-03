@@ -239,7 +239,7 @@ def run_redshift_optimizer():
 
                     df_time = df_filtered.groupby(df_filtered['timestamp'].dt.hour).agg(
                         total=('is_redundant',lambda x: (x == True).sum()),
-                        unique=('is_redundant',lambda x: (x == False).sum()) #---------------------------------- checar
+                        unique=('is_redundant',lambda x: (x == False).sum())
                     ).reset_index()
 
                     df_time = df_time.rename(columns={'timestamp': 'hour_of_day'})
@@ -375,12 +375,12 @@ def run_redshift_optimizer():
                 )
 
                 # Here, your old “money” used mb_scanned * 0.00005; you can keep it or use cost from fact.
-                total_money_now = float(df_filtered["mb_scanned"].sum() * 0.00005)
+                total_money_now = float(df_filtered["cost"].sum())
                 total_time_now = float(df_filtered["duration_sec"].sum() / 3600.0)
                 total_mb_now = float(df_filtered["mb_scanned"].sum())
 
                 redundant_mask = df_filtered["is_redundant"] == True
-                saving_money = float(df_filtered.loc[redundant_mask, "mb_scanned"].sum() * 0.00005)
+                saving_money = float(df_filtered.loc[redundant_mask, "cost"].sum())
                 saving_time = float(df_filtered.loc[redundant_mask, "duration_sec"].sum() / 3600.0)
                 saving_mb = float(df_filtered.loc[redundant_mask, "mb_scanned"].sum())
 
