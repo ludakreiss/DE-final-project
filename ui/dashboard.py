@@ -133,6 +133,14 @@ def load_actions_filtered(f_type, f_fp, time_range):
 
 # ---------- App ----------
 def run_redshift_optimizer():
+    if "last_refresh" not in st.session_state:
+        st.session_state.last_refresh = datetime.datetime.now()
+
+    now = datetime.datetime.now()
+    if (now - st.session_state.last_refresh).seconds >= 60:
+        st.session_state.last_refresh = now
+        st.rerun()
+
     st.set_page_config(page_title="Redshift Optimizer", layout="wide")
     apply_style()
 
