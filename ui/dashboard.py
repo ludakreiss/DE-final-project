@@ -340,9 +340,9 @@ def run_redshift_optimizer():
                     df_detail["suggested_action"] = (
                             df_detail["fingerprint"] + " - Investigate / Optimize"
                         )
-                    df_detail = df_detail.head(10)
+                    df_detail = df_detail.head(10).drop_duplicates()
                 else:
-                    df_detail = actions.head(10)
+                    df_detail = actions.head(10).drop_duplicates()
 
                 styled_detail = df_detail.style.set_properties(**{
                     "background-color": "#1E293B",
