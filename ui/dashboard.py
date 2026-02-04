@@ -201,8 +201,6 @@ def run_redshift_optimizer():
                 # BUT KPIs/charts could read precomputed tables.
                 # For minimal changes, we load a window of fact anyway.
                 df_filtered = load_fact_filtered(f_type, f_fp, time_range)
-                st.write("Filtered rows:", len(df_filtered))
-                st.write("Max timestamp:", df_filtered["timestamp"].max())
 
             if df_filtered.empty:
                 st.info("No data for selected filters/time range.")
