@@ -704,7 +704,7 @@ def run_redshift_optimizer():
                     with arch_cols[i]:
                         st.markdown(f"""
                             <div class='about-card'>
-                                <div style='color: #7DD3FC; font-size: 1.5rem; </div>
+                                <div style='color: #7DD3FC; font-size: 1.5rem;'>⚙️ </div>
                                 <strong>{tech}</strong><br>
                                 <small style='color: #94A3B8;'>{desc}</small>
                             </div>
