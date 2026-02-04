@@ -622,7 +622,7 @@ def run_redshift_optimizer():
                     st.session_state.good_set = set(selected_good)
 
                 # -------- New Game --------
-                if st.button("🔄 New Game"):
+                if st.button("New Game"):
                     for k in ["bubble_traits", "good_set", "clicked", "game_over", "win", "message"]:
                         st.session_state.pop(k, None)
                     st.rerun()
@@ -648,15 +648,15 @@ def run_redshift_optimizer():
                             # Bad click -> game over
                             if trait not in st.session_state.good_set:
                                 st.session_state.game_over = True
-                                st.session_state.message = f"💥 Game Over!\n\nBad trait:\n**{trait}**"
+                                st.session_state.message = f"Game Over!\n\nBad trait:\n**{trait}**"
                             else:
                                 #st.toast("Nice pick! ✅")
-                                st.session_state.message = f"✅ Good pick!\n**{trait}**"
+                                st.session_state.message = f"Good pick!\n**{trait}**"
 
                             # Win condition = 3 good clicks
                             if len(st.session_state.clicked & st.session_state.good_set) == 3:
                                 st.session_state.win = True
-                                st.session_state.message = "🏆 You found all good traits!"
+                                st.session_state.message = "You found all good traits!"
 
                             st.rerun()
 
@@ -671,7 +671,7 @@ def run_redshift_optimizer():
                         st.success(st.session_state.message)
             # -- Tab 4: About US --
             elif view == "About Us":
-                st.markdown("## 📊 What is Table Flippers?")
+                st.markdown("# What is Table Flippers?")
                 st.write("""
                 Table Flippers is a real-time data optimization system designed to bring transparency
                 to database workloads. We don't just observe; we simulate and analyze to find
@@ -679,12 +679,12 @@ def run_redshift_optimizer():
                 """)
 
                 features = [
-                    "🔄 **Replays** real query workloads",
-                    "🚀 **Streams** them through Kafka",
-                    "🕵️ **Analyzes** them live",
-                    "🔍 **Detects** redundant patterns using fingerprints",
-                    "💰 **Calculates** performance and cost impact",
-                    "📈 **Shows** optimization opportunities instantly",
+                    "Replays real query workloads",
+                    "Streams them through Kafka",
+                    "Analyzes them live",
+                    "Detects redundant patterns using fingerprints",
+                    "Calculates performance and cost impact",
+                    "Shows optimization opportunities instantly",
                 ]
                 for feat in features:
                     st.markdown(f"<div class='arch-step'>{feat}</div>", unsafe_allow_html=True)
@@ -704,7 +704,7 @@ def run_redshift_optimizer():
                     with arch_cols[i]:
                         st.markdown(f"""
                             <div class='about-card'>
-                                <div style='color: #7DD3FC; font-size: 1.5rem;'>⚙️</div>
+                                <div style='color: #7DD3FC; font-size: 1.5rem; </div>
                                 <strong>{tech}</strong><br>
                                 <small style='color: #94A3B8;'>{desc}</small>
                             </div>
@@ -712,7 +712,7 @@ def run_redshift_optimizer():
 
                 st.divider()
 
-                st.markdown("## 🤝 Meet the Team — Table Flippers")
+                st.markdown("## Meet the Team — Table Flippers")
                 team_cols = st.columns(4)
                 team = [
                     ("Dakshata", "Streaming & Replay Engineer"),
