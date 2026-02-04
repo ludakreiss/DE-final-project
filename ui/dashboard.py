@@ -152,7 +152,7 @@ def run_redshift_optimizer():
         st.image("ui/logo.png", width=100)
 
     # Overall tabs
-    tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","You Are The Optimizer","About Us"]
+    tabs = ["Performance KPIs","Fingerprint Analysis","Optimization","You Are The Optimizer","Query Bubble Game","About Us"]
     current_view = st.pills("Dashboard view",tabs, default="Performance KPIs")
 
     @st.fragment(run_every=60)
@@ -432,14 +432,14 @@ def run_redshift_optimizer():
                     "Pick TWO that you would materialize to save the most warehouse cost."
                 )
 
-                # ---- Build metrics from REAL filtered data ----
+                # ---- TRUE COST MODEL from parquet columns ----
                 df_game = df_filtered.groupby("fingerprint").agg(
-                    total_mb=("mb_scanned", "sum"),
                     frequency=("query_id", "count"),
-                    avg_time=("duration_sec", "mean")
+                    total_compile_ms=("compile_duration_ms", "sum"),
+                    total_execution_ms=("execution_duration_ms", "sum"),
+                    total_queue_ms=("queue_duration_ms", "sum"),
                 ).reset_index()
 
-                df_game["waste_score"] = df_game["total_mb"] * df_game["frequency"]
                 df_game = df_game[df_game["frequency"] > 2]
 
                 # ---- SESSION STATE INIT ----
@@ -479,13 +479,28 @@ def run_redshift_optimizer():
                     )
                 else:
                     candidates = st.session_state.game_candidates
-
+                # ---- SECRET optimizer formula (hidden from user) ----
+                candidates["waste_score"] = (
+                    128 * 0.4278 * (
+                        candidates["total_compile_ms"] +
+                        candidates["total_execution_ms"] +
+                        candidates["total_queue_ms"]
+                    ) / 1000.0
+                )
                 # ---- Display table with FP labels ----
                 st.dataframe(
-                    candidates[["fp_label", "frequency", "total_mb", "avg_time"]],
+                    candidates[[
+                        "fp_label",
+                        "frequency",
+                        "total_compile_ms",
+                        "total_execution_ms",
+                        "total_queue_ms",
+                    ]],
                     use_container_width=True,
                     hide_index=True
                 )
+
+
 
                 # ---- User selection (labels only) ----
                 choices = st.multiselect(
@@ -528,6 +543,7 @@ def run_redshift_optimizer():
                     st.subheader("Result")
 
                     if set(real_choices) == set(best):
+                        st.snow()
                         st.success("Perfect! You think exactly like Table Flippers optimizer 🚀")
                     else:
                         st.error("Not optimal!")
@@ -551,7 +567,106 @@ def run_redshift_optimizer():
                     ]
 
                     st.dataframe(user_df, use_container_width=True, hide_index=True)
+            elif view == "Query Bubble Game":
 
+                st.title("Build the Perfect Query")
+                st.write("Click only the GOOD traits. One bad click = game over.")
+
+                import random
+
+                good_traits = [
+                    "Uses partition pruning",
+                    "Filters early in WHERE clause",
+                    "Selects only required columns",
+                    "Uses proper JOIN keys",
+                    "Aggregates after filtering",
+                    "Uses SORTKEY efficiently",
+                    "Small data scan (<100MB)",
+                    "Reuses materialized view"
+                ]
+
+                bad_traits = [
+                    "SELECT * from 10TB table",
+                    "Cross join without condition",
+                    "No WHERE clause",
+                    "Scans entire history table",
+                    "Functions on JOIN columns",
+                    "Nested subqueries 5 levels deep",
+                    "Casting columns in filters",
+                    "ORDER BY huge dataset"
+                ]
+
+                # -------- SAFE SESSION INIT --------
+                for k, v in {
+                    "bubble_traits": [],
+                    "good_set": set(),
+                    "clicked": set(),
+                    "game_over": False,
+                    "win": False,
+                    "message": ""
+                }.items():
+                    if k not in st.session_state:
+                        st.session_state[k] = v
+
+                # -------- Create ONLY 6 bubbles (3 good, 3 bad) --------
+                if not st.session_state.bubble_traits:
+                    selected_good = random.sample(good_traits, 3)
+                    selected_bad = random.sample(bad_traits, 3)
+
+                    traits = selected_good + selected_bad
+                    random.shuffle(traits)
+
+                    st.session_state.bubble_traits = traits
+                    st.session_state.good_set = set(selected_good)
+
+                # -------- New Game --------
+                if st.button("🔄 New Game"):
+                    for k in ["bubble_traits", "good_set", "clicked", "game_over", "win", "message"]:
+                        st.session_state.pop(k, None)
+                    st.rerun()
+
+                traits = st.session_state.bubble_traits
+
+                # -------- Render bubbles (3 columns) --------
+                cols = st.columns(3)
+
+                for i, trait in enumerate(traits):
+
+                    # Bubble disappears after click
+                    if trait in st.session_state.clicked:
+                        continue
+
+                    col = cols[i % 3]
+
+                    with col:
+                        if st.button(trait, key=f"bubble_{i}"):
+
+                            st.session_state.clicked.add(trait)
+
+                            # Bad click -> game over
+                            if trait not in st.session_state.good_set:
+                                st.session_state.game_over = True
+                                st.session_state.message = f"💥 Game Over!\n\nBad trait:\n**{trait}**"
+                            else:
+                                #st.toast("Nice pick! ✅")
+                                st.session_state.message = f"✅ Good pick!\n**{trait}**"
+
+                            # Win condition = 3 good clicks
+                            if len(st.session_state.clicked & st.session_state.good_set) == 3:
+                                st.session_state.win = True
+                                st.session_state.message = "🏆 You found all good traits!"
+
+                            st.rerun()
+
+                # -------- Messages --------
+                st.divider()
+
+                if st.session_state.message:
+                    if st.session_state.game_over:
+                        st.error(st.session_state.message)
+                    elif st.session_state.win:
+                        st.balloons()
+                        st.success(st.session_state.message)
             # -- Tab 4: About US --
             elif view == "About Us":
                 st.markdown("## 📊 What is Table Flippers?")
