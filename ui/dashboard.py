@@ -158,7 +158,7 @@ def run_redshift_optimizer():
     @st.fragment(run_every=60)
     def render_dashboard(view):
         # If DB doesn’t exist yet
-        st.write("DB last modified:", datetime.datetime.fromtimestamp(os.path.getmtime(DB_PATH)))
+        st.write("Last Update:", datetime.datetime.fromtimestamp(os.path.getmtime(DB_PATH)))
         if not os.path.exists(DB_PATH):
             st.info("Waiting for metrics.duckdb... (Run metrics.py)")
             empty_col1, empty_col2, empty_col3 = st.columns([1, 1, 1])
@@ -196,8 +196,6 @@ def run_redshift_optimizer():
             if use_filtered:
 
                 df_filtered = load_fact_filtered(f_type, f_fp, time_range)
-                st.write("Filtered rows:", len(df_filtered))
-                st.write("Max timestamp:", df_filtered["timestamp"].max())
             else:
                 # no filters: still easiest is to read from fact for the plots,
                 # BUT KPIs/charts could read precomputed tables.
@@ -235,7 +233,7 @@ def run_redshift_optimizer():
                 col_graph, col_pie = st.columns([2, 1])
 
                 with col_graph:
-                    st.subheader("Time vs Queries (Total vs Unique)")
+                    st.subheader("Hour vs Queries (Unique vs Total)")
 
                     df_time = df_filtered.groupby(df_filtered['timestamp'].dt.hour).agg(
                         total=('is_redundant',lambda x: (x == True).sum()),
@@ -335,17 +333,23 @@ def run_redshift_optimizer():
                 st.divider()
                 st.subheader("Detailed Query Optimization Actions")
 
+                # List of 25 worst queries
+                top_worst_fps = df_top25['fingerprint'].tolist()
+
                 # If you want suggestions to match your metrics.py table:
                 actions = load_actions_filtered(f_type, f_fp, time_range)
                 if actions.empty:
-                    slow = df_filtered["execution_duration_ms"].fillna(0) > 5000  # 5 seconds in ms
+
+                    # Only individual queries from the worst fingerprints
+                    mask_worst = df_filtered["fingerprint"].isin(top_worst_fps)
+                    #slow = df_filtered["execution_duration_ms"].fillna(0) > 5000  # 5 seconds in ms
                     df_detail = (
-                        df_filtered.loc[slow, ["timestamp", "query_id", "fingerprint"]]
+                        df_filtered.loc[mask_worst, ["timestamp", "query_id", "fingerprint"]]
+                            .sort_values("execution_duration_ms", ascending=False)
                             .drop_duplicates(subset=["timestamp", "query_id", "fingerprint"])
                             [["timestamp", "query_id", "fingerprint"]]
                             .copy()
                         )
-
                     df_detail["suggested_action"] = (
                             df_detail["fingerprint"] + " - Investigate / Optimize"
                         )
@@ -398,7 +402,7 @@ def run_redshift_optimizer():
                     unit = "MB"
 
                 comparison_data = pd.DataFrame({
-                    "Scenario": ["Current (Redundant)", "After optimization"],
+                    "Scenario": ["Current (Redundant)", "Unique Queries"],
                     "Value": [val_actual, val_projected],
                 })
 
