@@ -99,21 +99,26 @@ pip install -r requirements.txt
 
 # Dataset setup
 Due to GitHub file size limits, the dataset is not included in the repository.
-Steps to run locally:
+### Steps to run locally:
 
-* Using`PowerShell`:
+#### Manually
+1. Download `sample_0.01.parquet`
+2. Place it in `data/raw/`
+
+#### Other ways
+
+* Using `PowerShell`
 ```
  Invoke-WebRequest https://s3.amazonaws.com/redshift-downloads/redset/serverless/sample_0.01.parquet `
   -OutFile data/raw/sample_0.01.parquet
 ```
-
-* Using `curl`:
+* Using `curl`
 ```
 curl -o data/raw/sample_0.01.parquet \
   https://s3.amazonaws.com/redshift-downloads/redset/serverless/sample_0.01.parquet
 ```
 
-* Using `wegt`:
+* Using `wegt`
 ```
 wget -O data/raw/sample_0.01.parquet \
   https://s3.amazonaws.com/redshift-downloads/redset/serverless/sample_0.01.parquet
