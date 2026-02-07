@@ -1,6 +1,9 @@
 # Table Flippers: A Redset Streaming Project
-<img src="/ui/logo.png" alt="Fries" title="Table Flippers GO!" width="50%">
-This project implements a streaming pipeline for the [Redset dataset](https://github.com/amazon-science/redset).
+<p align="center">
+  <img src="/ui/logo.png" alt="Fries" title="Table Flippers GO!" width="50%">
+</p>
+
+This project implements a streaming pipeline for the [Redset dataset](https://github.com/amazon-science/redset/).
 It replays real Redshift query workloads in accelerated time and sends cleaned query events to Kafka for further analysis.
 These events are then consumed by a metrics engine that builds fact and metric tables, stores them in DuckDB, and powers a live dashboard for performance analysis and optimization insights.
 
@@ -105,12 +108,14 @@ Steps to run locally:
 ```
 
 * Using `curl`:
-```curl -o data/raw/sample_0.01.parquet \
+```
+curl -o data/raw/sample_0.01.parquet \
   https://s3.amazonaws.com/redshift-downloads/redset/serverless/sample_0.01.parquet
 ```
 
 * Using `wegt`:
-```wget -O data/raw/sample_0.01.parquet \
+```
+wget -O data/raw/sample_0.01.parquet \
   https://s3.amazonaws.com/redshift-downloads/redset/serverless/sample_0.01.parquet
 ```
 ---
