@@ -1,6 +1,6 @@
 # Table Flippers: A Redset Streaming Project
 <p align="center">
-  <img src="/ui/logo.png" alt="Fries" title="Table Flippers GO!" width="50%">
+  <img src="src/ui/logo.png" alt="Fries" title="Table Flippers GO!" width="50%">
 </p>
 
 This project implements a streaming pipeline for the [Redset dataset](https://github.com/amazon-science/redset/).
