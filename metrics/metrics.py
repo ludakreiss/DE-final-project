@@ -83,18 +83,72 @@ def suggest_optimizations(df: pd.DataFrame) -> pd.DataFrame:
     slow = df["execution_duration_ms"] > 5000
 
     out = (
-        df[slow]
-        .drop_duplicates(subset=["timestamp", "query_id", "fingerprint"])
-        [["timestamp", "query_id", "fingerprint"]]
-        .copy()
+        df.loc[slow, ["timestamp", "query_id", "fingerprint", "query_type"]]
+          .drop_duplicates(subset=["timestamp", "query_id", "fingerprint"])
+          .copy()
     )
 
-    out["suggested_action"] = out["fingerprint"] + " - Investigate / Optimize"
+    suggested_optimizations = {
+        "select": [
+            "avoid select *",
+            "early filtering",
+            "good dist/sort keys",
+            "use materialized views",
+        ],
+        "copy": [
+            "prefer COPY bulk loads",
+            "file compression",
+            "etl-specific WLM",
+        ],
+        "insert": [
+            "batch inserts",
+            "use COPY instead",
+        ],
+        "update": [
+            "group updates",
+            "key-based predicates",
+        ],
+        "delete": [
+            "bulk deletes",
+            "CTAS instead of delete",
+            "reindex interleaved",
+        ],
+        "analyze": [
+            "post-change ANALYZE",
+        ],
+        "ctas": [
+            "explicit keys/encodings",
+            "ANALYZE new table",
+        ],
+        "unload": [
+            "optimize inner SELECT",
+            "multiple compressed files",
+        ],
+        "other": [
+            "WLM by workload",
+            "enable concurrency scaling",
+            "monitor table health",
+        ],
+    }
+
+    out["query_type"] = out["query_type"].astype("string").str.upper()
+    # Add debugging
+    # for key, value in suggested_optimizations.items():
+    #     print(f"Key: {key}, Type: {type(value)}, Value: {value}")
+    # Or check a specific problematic qt
+    # test_qt = "copy"  # Replace with actual problematic qt
+    # print(f"For qt={test_qt}: {suggested_optimizations.get(test_qt)}")
+    # print(f"Type: {type(suggested_optimizations.get(test_qt))}")
+    out["suggested_action"] = out["query_type"].apply(
+        lambda qt: ", ".join(suggested_optimizations.get(qt.lower(), [])))
+
+
+
     return out
 
-
-
 # -------------------- Preparation / normalization --------------------
+
+
 def prepare_df(raw: pd.DataFrame) -> pd.DataFrame:
     df = raw.copy()
 
