@@ -11,4 +11,4 @@ __pycache__/
 .env/
 
 #DuckDB
-metrics/metrics.duckdb
+artifacts/metrics.duckdb
