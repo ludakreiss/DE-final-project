@@ -54,17 +54,12 @@ The pipeline consists of the following main steps:
 DE-final-project
     ├── LICENSE
     ├── README.md
+    ├── artifacts
     ├── data
     │   ├── consumed
     │   │   └── cleaned_consumed.parquet
-    │   ├── metrics
     │   └── raw
     │       └── sample_0.01.parquet
-    ├── main.py
-    ├── metrics
-    │   ├── metrics.duckdb
-    │   ├── metrics.py
-    │   └── metrics_consumer.py
     ├── pyproject.toml
     ├── requirements.txt
     ├── src
@@ -72,15 +67,24 @@ DE-final-project
     │   │   ├── cleaning.cpython-313.pyc
     │   │   ├── ingestion.cpython-313.pyc
     │   │   └── streaming.cpython-313.pyc
-    │   ├── cleaning.py
-    │   ├── ingestion.py
-    │   └── streaming.py
-    ├── ui
-    │   ├── __pycache__
-    │   │   └── css.cpython-313.pyc
-    │   ├── css.py
-    │   ├── dashboard.py
-    │   └── logo.png
+    │   ├── constants.py
+    │   ├── main.py
+    │   ├── metrics
+    │   │   ├── metrics.py
+    │   │   └── metrics_consumer.py
+    │   ├── optimization.py
+    │   ├── pipeline
+    │   │   ├── cleaning.py
+    │   │   ├── ingestion.py
+    │   │   └── streaming.py
+    │   └── ui
+    │       ├── css.cpython-313.pyc
+    │       ├── dashboard.py
+    │       ├── data_access.py
+    │       ├── db_helpers.py
+    │       ├── logo.png
+    │       ├── styles.py
+    │       └── ui_config.py
     └── uv.lock
 ```
 # Requirements
