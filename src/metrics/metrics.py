@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timezone
 import duckdb
 import pandas as pd
-from src.constants import CLEANED_PATH, DB_PATH
+from src.constants import CLEANED_PATH, ARTIFACT_DIR, DB_PATH
 from src.optimization import suggest_optimizations
 
 
@@ -405,7 +405,7 @@ def compute_and_write_metrics() -> None:
 
 def main() -> None:
     print("metrics.py started; reading:", CLEANED_PATH)
-    print("writing duckdb snapshot to:", DB_PATH)
+    print("writing duckdb snapshot to:", ARTIFACT_DIR)
     while True:
         compute_and_write_metrics()
         time.sleep(60) # to match with the kafka streaming time as well
