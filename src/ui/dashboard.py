@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import datetime
 import os
+import time
 from styles import apply_style
 import random
 from ui_config import (PAGE_TITLE, LAYOUT, 
@@ -46,8 +47,16 @@ def run_redshift_optimizer():
     @st.fragment(run_every=AUTO_REFRESH_SECONDS)
     def render_dashboard(view):
         # If DB doesn’t exist yet = loading state
-        st.write("Last Update:",
-                 datetime.datetime.fromtimestamp(os.path.getmtime(DB_PATH)))
+        if os.path.exists(DB_PATH):
+            st.write(
+                "Last Update:",
+                datetime.datetime.fromtimestamp(os.path.getmtime(DB_PATH))
+            )
+        else:
+            st.info("Waiting for metrics.duckdb to be created...")
+            time.sleep(10)
+            return
+
         if not os.path.exists(DB_PATH):
             st.info("Waiting for metrics.duckdb... (Run metrics.py)")
             empty_col1, empty_col2, empty_col3 = st.columns([1, 1, 1])
