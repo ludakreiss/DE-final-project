@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import os
 import time
-from src.constants import CLEANED_PATH, KAFKA_BROKER, KAFKA_TOPIC
+from src.constants import CLEANED_PATH, KAFKA_BROKER, KAFKA_TOPIC, KAFKA_GROUP_ID
 
 
 
@@ -11,8 +11,8 @@ from src.constants import CLEANED_PATH, KAFKA_BROKER, KAFKA_TOPIC
 def consume_data():
 
     consumer = Consumer({
-        "bootstrap.servers": KAFKA_BROKER ,
-        "group.id": KAFKA_TOPIC,
+        "bootstrap.servers": KAFKA_BROKER,
+        "group.id": KAFKA_GROUP_ID,
         "auto.offset.reset": "earliest"
     })
 
