@@ -1,22 +1,3 @@
-"""
-metrics.py (DuckDB version)
-
-Reads the continuously-updated cleaned_consumed.parquet and writes ONE DuckDB file:
-  metrics/metrics.duckdb
-
-Tables inside metrics.duckdb:
-  - fact (1 row per query execution; filterable by timestamp/query_type/fingerprint)
-  - kpis
-  - query_type_counts
-  - time_series_hour
-  - fingerprint_stats
-  - optimization_actions
-  - top_joins
-  - top_perm_tables
-
-Writes are atomic: build a temp DB and os.replace() it in place.
-"""
-
 import os
 import time
 from datetime import datetime, timezone
