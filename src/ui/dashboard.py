@@ -4,7 +4,7 @@ import plotly.express as px
 import datetime
 import os
 from styles import apply_style
-from constants import DB_PATH, COST, NO_OF_RPUS
+from src.constants import DB_PATH, COST, NO_OF_RPUS
 from ui_config import (PAGE_TITLE, LAYOUT, 
                        LOGO_PATH, LOGO_WIDTH, TABS, AUTO_REFRESH_SECONDS, 
                        ABOUT_TITLE, ABOUT_TEXT,ABOUT_FEATURES, 
