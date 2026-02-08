@@ -3,7 +3,7 @@ import time
 from datetime import timedelta
 import pandas as pd
 from confluent_kafka import Producer
-from constants import KAFKA_BROKER, KAFKA_TOPIC
+from src.constants import KAFKA_BROKER, KAFKA_TOPIC
 
 
 def replay_hourly(

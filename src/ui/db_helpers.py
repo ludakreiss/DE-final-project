@@ -1,6 +1,6 @@
 import duckdb
 import pandas as pd
-from constants import DB_PATH
+from src.constants import DB_PATH
 
 
 def query_df(sql: str, params=None) -> pd.DataFrame:
