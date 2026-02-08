@@ -55,20 +55,17 @@ DE-final-project
     ├── LICENSE
     ├── README.md
     ├── artifacts
+    │   └── metrics.duckdb
     ├── data
     │   ├── consumed
     │   │   └── cleaned_consumed.parquet
     │   └── raw
     │       └── sample_0.01.parquet
+    ├── main.py
     ├── pyproject.toml
     ├── requirements.txt
     ├── src
-    │   ├── __pycache__
-    │   │   ├── cleaning.cpython-313.pyc
-    │   │   ├── ingestion.cpython-313.pyc
-    │   │   └── streaming.cpython-313.pyc
     │   ├── constants.py
-    │   ├── main.py
     │   ├── metrics
     │   │   ├── metrics.py
     │   │   └── metrics_consumer.py
@@ -78,7 +75,6 @@ DE-final-project
     │   │   ├── ingestion.py
     │   │   └── streaming.py
     │   └── ui
-    │       ├── css.cpython-313.pyc
     │       ├── dashboard.py
     │       ├── data_access.py
     │       ├── db_helpers.py
@@ -128,7 +124,12 @@ wget -O data/raw/sample_0.01.parquet \
   https://s3.amazonaws.com/redshift-downloads/redset/serverless/sample_0.01.parquet
 ```
 ---
-
+# Running the Project
+Go to `DE-final-project` directory and run:
+```
+python main.py
+```
+--- 
 # References
 Below are some sources that were used in order to implement this project
 ## Repositories 
