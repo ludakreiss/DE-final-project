@@ -4,7 +4,7 @@ import plotly.express as px
 import datetime
 import os
 from styles import apply_style
-from src.constants import DB_PATH, COST, NO_OF_RPUS
+
 from ui_config import (PAGE_TITLE, LAYOUT, 
                        LOGO_PATH, LOGO_WIDTH, TABS, AUTO_REFRESH_SECONDS, 
                        ABOUT_TITLE, ABOUT_TEXT,ABOUT_FEATURES, 
@@ -12,7 +12,7 @@ from ui_config import (PAGE_TITLE, LAYOUT,
                        TOP_USAGE_FPS, TOP_WORST_FPS, DETAIL_LIMIT)
 from data_access import (load_filter_domains, load_fact_filtered, 
                          load_actions_filtered)
-from optimization import suggest_optimizations
+from src.optimization import suggest_optimizations
 
 
 def run_redshift_optimizer():
@@ -44,10 +44,12 @@ def run_redshift_optimizer():
     # ------------- 60 s refresh loop ----------------
     @st.fragment(run_every=AUTO_REFRESH_SECONDS)
     def render_dashboard(view):
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        db_path = os.path.join(root_dir, "artifacts", "metrics.duckdb")
         # If DB doesn’t exist yet = loading state
         st.write("Last Update:",
-                 datetime.datetime.fromtimestamp(os.path.getmtime(DB_PATH)))
-        if not os.path.exists(DB_PATH):
+                 datetime.datetime.fromtimestamp(os.path.getmtime(db_path)))
+        if not os.path.exists(db_path):
             st.info("Waiting for metrics.duckdb... (Run metrics.py)")
             empty_col1, empty_col2, empty_col3 = st.columns([1, 1, 1])
             with empty_col2:
@@ -373,7 +375,7 @@ def run_redshift_optimizer():
                     candidates = st.session_state.game_candidates
                 # Optimizer formula 
                 candidates["waste_score"] = (
-                    NO_OF_RPUS * COST * (
+                    128 * 0.4278 * (
                         candidates["total_compile_ms"] +
                         candidates["total_execution_ms"] +
                         candidates["total_queue_ms"]

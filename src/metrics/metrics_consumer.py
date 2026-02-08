@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import os
 import time
-from constants import PARQUET_PATH, KAFKA_BROKER, KAFKA_TOPIC
+from src.constants import PARQUET_PATH, KAFKA_BROKER, KAFKA_TOPIC
 
 def consume_data():
 

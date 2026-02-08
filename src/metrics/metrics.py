@@ -3,8 +3,8 @@ import time
 from datetime import datetime, timezone
 import duckdb
 import pandas as pd
-from constants import CLEANED_PATH, DB_PATH
-from optimization import suggest_optimizations
+from src.constants import CLEANED_PATH, DB_PATH
+from src.optimization import suggest_optimizations
 
 
 

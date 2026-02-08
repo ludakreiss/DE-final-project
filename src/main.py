@@ -1,6 +1,7 @@
-from pipeline.ingestion import load_raw_data
-from pipeline.cleaning import clean_data
-from pipeline.streaming import replay_hourly
+from src.pipeline.ingestion import load_raw_data
+from src.pipeline.cleaning import clean_data
+from src.pipeline.streaming import replay_hourly
+from src.constants import PARQUET_PATH
 
 import threading
 import os
@@ -26,7 +27,7 @@ def main():
     time.sleep(5)
 
     # 4) Load raw data
-    df = load_raw_data("data/raw/sample_0.01.parquet")
+    df = load_raw_data(PARQUET_PATH)
     print(f"Loaded {len(df)} raw rows")
 
     # 5) Clean data
