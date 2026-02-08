@@ -4,18 +4,19 @@ from src.pipeline.streaming import replay_hourly
 from src.constants import PARQUET_PATH
 
 import threading
-import os
 import time
+import subprocess
+import sys
 
 def start_metrics_consumer():
-    os.system("python metrics/metrics_consumer.py")
+    subprocess.Popen([sys.executable, "-m", "src.metrics.metrics_consumer"])
 
 def start_metrics_engine():
-    os.system("python metrics/metrics.py")
+    subprocess.Popen([sys.executable, "-m", "src.metrics.metrics"])
 
 def start_ui():
     time.sleep(3)
-    os.system("streamlit run ui/dashboard.py")
+    subprocess.Popen([sys.executable, "-m", "streamlit", "run", "src/ui/dashboard.py"])
 
 def main():
     print("Starting Redset Full System...")
