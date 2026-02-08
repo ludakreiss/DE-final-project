@@ -3,7 +3,10 @@ import json
 import pandas as pd
 import os
 import time
-from src.constants import PARQUET_PATH, KAFKA_BROKER, KAFKA_TOPIC
+from src.constants import CLEANED_PATH, KAFKA_BROKER, KAFKA_TOPIC
+
+
+
 
 def consume_data():
 
@@ -13,9 +16,9 @@ def consume_data():
         "auto.offset.reset": "earliest"
     })
 
-    consumer.subscribe(["redset-replay"])
+    consumer.subscribe([KAFKA_TOPIC])  # changed from redset-replay
 
-    os.makedirs(os.path.dirname(PARQUET_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(CLEANED_PATH), exist_ok=True)
 
     topic_data = []
     last_write = time.time()
@@ -25,6 +28,10 @@ def consume_data():
     try:
         while True:
             msg = consumer.poll(0.1)
+            if msg is None:
+                # print("No message yet") # used for debugging
+                pass
+
 
             if msg is not None and not msg.error():
                 data = json.loads(msg.value().decode("utf-8"))
@@ -34,12 +41,20 @@ def consume_data():
             if time.time() - last_write >= 60 and topic_data:
                 hour_df = pd.DataFrame(topic_data)
 
-                if os.path.exists(PARQUET_PATH):
-                    existing = pd.read_parquet(PARQUET_PATH)
+                if os.path.exists(CLEANED_PATH):
+
+
+
+                    existing = pd.read_parquet(CLEANED_PATH)
+
+
+
                     hour_df = pd.concat([existing, hour_df], ignore_index=True)
 
-                hour_df.to_parquet(PARQUET_PATH, index=False)
+                hour_df.to_parquet(CLEANED_PATH, index=False)
                 print(f"Wrote {len(hour_df)} rows")
+                print(f"Buffered messages: {len(topic_data)}")
+
 
                 topic_data = []
                 last_write = time.time()
