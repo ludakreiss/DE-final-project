@@ -2,7 +2,7 @@
 PAGE_TITLE = "Redshift Optimizer"
 LAYOUT = "wide"
 
-LOGO_PATH = "ui/logo.png"
+LOGO_PATH = "src/ui/logo.png"
 LOGO_WIDTH = 100
 
 AUTO_REFRESH_SECONDS = 60
