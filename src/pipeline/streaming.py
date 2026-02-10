@@ -14,35 +14,43 @@ def replay_hourly(
     topic: str = KAFKA_TOPIC,
 ):
 
+    # Create Kafka producer with provided broker configuration
     producer = Producer({"bootstrap.servers": kafka_broker})
 
+    # Determine the time window for replay based on earliest timestamp
     start_ts = df["arrival_timestamp"].min()
     end_ts = start_ts + timedelta(hours=hours)
 
+    # Filter data to only include rows within the replay window
     df = df[
         (df["arrival_timestamp"] >= start_ts) &
         (df["arrival_timestamp"] < end_ts)
     ]
 
+    # Create a copy and assign each row to an hourly time bucket
     df = df.copy()
     df.loc[:, "hour_bucket"] = df["arrival_timestamp"].dt.floor("h")
 
+    # Group data by hour for controlled replay
     hour_groups = df.groupby("hour_bucket")
 
     print(f"Starting replay for {len(hour_groups)} hours")
 
+    # Iterate through each hour group and send records to Kafka
     for hour_index, (hour, hour_df) in enumerate(hour_groups):
         print(f"Replaying hour {hour_index}: {hour}")
 
-        # send rows normally (Kafka safe)
+        # Send each row as a JSON message to Kafka
         for _, row in hour_df.iterrows():
             producer.produce(
                 topic,
                 value=json.dumps(row.to_dict(), default=str)
             )
 
+        # Ensure all messages for the hour are delivered
         producer.flush()
 
+        # Wait before sending the next hour's data to simulate real-time flow
         if hour_index < hours - 1:
             time.sleep(sleep_seconds)
 
